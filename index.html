@@ -6,8 +6,6 @@
 <title>ReadyPlex | Genera tu pedido</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- jsPDF + AutoTable -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
 
@@ -19,31 +17,21 @@
   .card{background:var(--bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
   .header{display:block;margin-bottom:8px}
 
-  /* Cabecera: logo (izq), títulos (centro), empresa/RUC (der.) */
-  .header-top{
-    display:grid;
-    grid-template-columns: 220px 1fr 280px;
-    align-items:center;
-    gap:16px;
+  .header-top{display:grid;grid-template-columns: 220px 1fr 280px;align-items:center;gap:16px;}
+  .logo-box{width:220px;height:120px;background:var(--celeste);border-radius:14px;overflow:hidden}
+  .logo{
+    width:100%;
+    height:100%;
+    object-fit:fill;   /* Estira la imagen para llenar el recuadro */
+    display:block;
   }
 
-  /* Caja celeste del logo y la imagen que la cubre por completo */
-  .logo-box{
-    width:220px; height:120px; background:var(--celeste);
-    border-radius:14px; overflow:hidden;
-  }
-  .logo{width:100%;height:100%;object-fit:cover;display:block}
-
-  /* Títulos centrados */
   .titlebox{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center}
   h1{margin:0;font-size:clamp(22px,4.5vw,36px);font-weight:700}
   .sub{color:var(--muted);font-size:15px}
 
-  /* Empresa/RUC a la derecha en columna */
-  .client{display:flex; flex-direction:column; gap:10px;}
-  .client select, .client input{
-    padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:14px;background:#f3f6ff
-  }
+  .client{display:flex;flex-direction:column;gap:10px;}
+  .client select,.client input{padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:14px;background:#f3f6ff}
   .client input[readonly]{background:#eef2ff;color:#1f2937}
 
   .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
@@ -59,14 +47,8 @@
   .name-btn:focus{outline:2px solid #c7d2fe;border-radius:6px}
   .code{font-weight:700;letter-spacing:.3px}
 
-  /* Cantidad más angosta (~1cm) */
-  .qty{
-    width:1.5cm; /* aprox 1 cm */
-    padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:12px;
-    font-size:15px;outline:none;text-align:left
-  }
+  .qty{width:2cm;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:15px;outline:none;text-align:left}
   .qty:focus{border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
-
   .unit{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff}
   .select-btn{appearance:none;border:0;border-radius:999px;padding:10px 18px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer;box-shadow:var(--shadow);transition:transform .06s,background .15s}
   .select-btn:active{transform:translateY(1px);background:var(--primary-pressed)}
@@ -81,10 +63,11 @@
   .page-btn[disabled]{opacity:.5;cursor:not-allowed}
   .page-info{color:var(--muted);font-size:14px}
 
-  /* Popover imagen */
-  .popover{position:absolute;background:#fff;border-radius:14px;box-shadow:0 20px 45px rgba(0,0,0,.18);padding:10px;z-index:50;display:none}
-  .popover img{width:240px;height:240px;object-fit:cover;border-radius:12px}
-  .popover::after{content:"";position:absolute;top:-8px;left:24px;border-width:8px;border-style:solid;border-color:transparent transparent #fff transparent}
+  /* Popover miniatura (160x220) */
+  .popover{position:absolute;z-index:50;display:none;background:transparent}
+  .popover .popcard{background:#fff;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);padding:8px}
+  .popover .viewport{width:160px;height:220px;display:flex;align-items:center;justify-content:center}
+  .popover img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
 
   /* Modal visor PDF */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
@@ -114,18 +97,13 @@
     <section class="card">
       <div class="header">
         <div class="header-top">
-          <!-- IZQ: Logo cubre el rectángulo -->
           <div class="logo-box">
-            <img id="logoRef" class="logo" src="https://scontent.flim19-1.fna.fbcdn.net/v/t39.30808-6/271974943_4906113876111461_3381060731274029006_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=0VOYx5jWn_0Q7kNvwHGZMJy&_nc_oc=AdmarQpnI6csRpjqku4r8da1VXJxMCvWq01vmx49cfPbt2xbxC2KLC9oNmvC4qkYbFA&_nc_zt=23&_nc_ht=scontent.flim19-1.fna&_nc_gid=b-oa-nx04DyfjgCUpbTGSA&oh=00_AfZEvlK5G5yPI5iUg_DUEIs_iAxpi5M48Nnud647ViGofQ&oe=68D731CF" alt="Logo ReadyPlex" />
+            <img id="logoRef" class="logo" src="imagenes/logo.jpg" alt="Logo ReadyPlex" />
           </div>
-
-          <!-- CENTRO: títulos centrados -->
           <div class="titlebox">
             <h1>Genera tu pedido Rediplast</h1>
-            <div class="sub">Selecciona los productos, indica cantidades y genera tu PDF.</div>
+            <div class="sub">Selecciona los productos, indica cantidades y genera tu pedido.</div>
           </div>
-
-          <!-- DER: Empresa (select) y RUC auto -->
           <div class="client">
             <select id="empresaSelect" aria-label="Empresa">
               <option value="">Selecciona empresa…</option>
@@ -133,7 +111,6 @@
             <input id="ruc" type="text" inputmode="numeric" placeholder="RUC" readonly />
           </div>
         </div>
-
         <div class="toolbar">
           <input id="search" class="search" type="search" placeholder="Buscar por nombre..." />
         </div>
@@ -163,14 +140,20 @@
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button id="btnClear" class="btn secondary" type="button">Borrar todo</button>
           <button id="btnPDF" class="btn" type="button">Vista previa PDF</button>
+          <!-- NUEVO: Enviar por WhatsApp -->
+          <button id="btnWhatsApp" class="btn" type="button" style="background:#25D366">Enviar por WhatsApp</button>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Popover imagen -->
+  <!-- Popover miniatura -->
   <div id="imgPopover" class="popover" role="dialog" aria-hidden="true">
-    <img alt="Vista producto" />
+    <div class="popcard">
+      <div class="viewport">
+        <img alt="Vista producto" />
+      </div>
+    </div>
   </div>
 
   <!-- Modal visor PDF -->
@@ -190,24 +173,17 @@
   </div>
 
 <script>
-  /* =======================
-     EMPRESAS (edítalas aquí)
-     ======================= */
+  /* Empresas */
   const COMPANIES = [
     { name: "PASTELERIA UNIVERSO", ruc: "1010256986" },
     { name: "SUPERMERCADO ALFA S.A.", ruc: "20512345678" },
-    { name: "BODEGA LA ESQUINA", ruc: "10456789012" },
-    { name: "DISTRIBUIDORA ANDES SAC", ruc: "20600112233" }
+    { name: "BODEGA LA ESQUINA", ruc: "10456789012" }
   ];
-
-  // Pinta el combo de empresas
   const empresaSelect = document.getElementById('empresaSelect');
   const rucInput = document.getElementById('ruc');
   for (const c of COMPANIES) {
     const opt = document.createElement('option');
-    opt.value = c.ruc; // usamos el RUC como value
-    opt.textContent = c.name;
-    empresaSelect.appendChild(opt);
+    opt.value = c.ruc; opt.textContent = c.name; empresaSelect.appendChild(opt);
   }
   empresaSelect.addEventListener('change', ()=>{
     const sel = empresaSelect.value;
@@ -215,42 +191,18 @@
     rucInput.value = found ? found.ruc : "";
   });
 
-  /* =======================
-     PRODUCTOS (ejemplo)
-     ======================= */
+  /* Productos (rutas locales en /imagenes) */
   const PRODUCTS = [
-    { name: "ZIPLOC 2X2",            code: "RP-0001-11111",   unit: "unidades", img: "https://scontent.flim19-1.fna.fbcdn.net/v/t39.30808-6/493746652_1328861588965677_4180579865064425792_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSZGc5c0v1EQ7kNvwGNKbyF&_nc_oc=Adm-t-P6w91UhNJ30FLnYHa7N_IsmmM9t0q79YJgfRrMiPl1ACmQC8tWxDscVrbKiDg&_nc_zt=23&_nc_ht=scontent.flim19-1.fna&_nc_gid=BgnpNIZM3EIQrFNxemJt5g&oh=00_Afb7XjzuEURogDzI346JV7tcl3_em410ZIgS6o4rHHrmLQ&oe=68D73B69" },
-    { name: "ZIPLOC 4X4",            code: "RP-0002-22222",   unit: "cientos",  img: "https://scontent.flim19-1.fna.fbcdn.net/v/t39.30808-6/493746652_1328861588965677_4180579865064425792_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSZGc5c0v1EQ7kNvwGNKbyF&_nc_oc=Adm-t-P6w91UhNJ30FLnYHa7N_IsmmM9t0q79YJgfRrMiPl1ACmQC8tWxDscVrbKiDg&_nc_zt=23&_nc_ht=scontent.flim19-1.fna&_nc_gid=BgnpNIZM3EIQrFNxemJt5g&oh=00_Afb7XjzuEURogDzI346JV7tcl3_em410ZIgS6o4rHHrmLQ&oe=68D73B69" },
-    { name: "BOLSA HD 25x35",        code: "RP-0003-2535",    unit: "millares", img: "img/bolsa2535.jpg" },
-    { name: "BOLSA HD 30x40",        code: "RP-0004-3040",    unit: "unidades", img: "img/bolsa3040.jpg" },
-    { name: "BOLSA HD 35x45",        code: "RP-0005-3545",    unit: "cientos",  img: "img/bolsa3545.jpg" },
-    { name: "BOLSA HD 40x50",        code: "RP-0006-4050",    unit: "millares", img: "img/bolsa4050.jpg" },
-    { name: "BOLSA ZIP 6x8",         code: "RP-0007-0608",    unit: "unidades", img: "img/zip68.jpg" },
-    { name: "BOLSA ZIP 8x10",        code: "RP-0008-0810",    unit: "cientos",  img: "img/zip810.jpg" },
-    { name: "BOLSA ZIP 10x15",       code: "RP-0009-1015",    unit: "millares", img: "img/zip1015.jpg" },
-    { name: "FILM STRETCH 12\"",     code: "RP-0010-ST12",    unit: "unidades", img: "img/stretch12.jpg" },
-    { name: "FILM STRETCH 18\"",     code: "RP-0011-ST18",    unit: "cientos",  img: "img/stretch18.jpg" },
-    { name: "MANGA PE 20 cm",        code: "RP-0012-MG20",    unit: "millares", img: "img/manga20.jpg" },
-    { name: "MANGA PE 30 cm",        code: "RP-0013-MG30",    unit: "unidades", img: "img/manga30.jpg" },
-    { name: "SACO RÁFIA 25 kg",      code: "RP-0014-RF25",    unit: "cientos",  img: "img/rafia25.jpg" },
-    { name: "SACO RÁFIA 50 kg",      code: "RP-0015-RF50",    unit: "millares", img: "img/rafia50.jpg" },
-    { name: "ETIQUETA 5x3 cm",       code: "RP-0016-ET53",    unit: "unidades", img: "img/etq53.jpg" },
-    { name: "ETIQUETA 8x5 cm",       code: "RP-0017-ET85",    unit: "cientos",  img: "img/etq85.jpg" },
-    { name: "SOBRE COURIER S",       code: "RP-0018-SCS",     unit: "millares", img: "img/courierS.jpg" },
-    { name: "SOBRE COURIER M",       code: "RP-0019-SCM",     unit: "unidades", img: "img/courierM.jpg" },
-    { name: "SOBRE COURIER L",       code: "RP-0020-SCL",     unit: "cientos",  img: "img/courierL.jpg" },
-    { name: "BOLSA BIO 25x35",       code: "RP-0021-BIO2535", unit: "millares", img: "img/bio2535.jpg" },
-    { name: "BOLSA BIO 30x40",       code: "RP-0022-BIO3040", unit: "unidades", img: "img/bio3040.jpg" },
-    { name: "SLEEVE CAN 330 ml",     code: "RP-0023-SLV330",  unit: "cientos",  img: "img/sleeve330.jpg" },
-    { name: "SLEEVE PET 600 ml",     code: "RP-0024-SLV600",  unit: "millares", img: "img/sleeve600.jpg" },
-    { name: "BOLSA VÁLVULA CAFÉ",    code: "RP-0025-VALCA",   unit: "unidades", img: "img/valvulaCafe.jpg" }
+    { name:"ZIPLOC 2X2", code:"12345678910", unit:"UNIDADES", img:"imagenes/2x2.png" },
+    { name:"ZIPLOC 3X3", code:"12345678911", unit:"CIENTO",  img:"imagenes/3x3.png" },
+    { name:"ZIPLOC 3X4", code:"12345678912", unit:"MILLAR",  img:"imagenes/3x4.png" },
+    { name:"ZIPLOC 3X5", code:"12345678913", unit:"CIENTO",  img:"imagenes/3x5.png" },
+    { name:"ZIPLOC 3X6", code:"12345678914", unit:"MILLAR",  img:"imagenes/3x6.png" }
   ];
 
-  /* ====== Búsqueda (solo nombre) + paginación ====== */
+  /* Búsqueda + paginación */
   const PAGE_SIZE = 10;
-  let state = { q: "", page: 1 };
-
-  // Estado persistente por producto
+  let state = { q:"", page:1 };
   const ORDER_STATE = new Map();
   for (const p of PRODUCTS) ORDER_STATE.set(p.code, { selected:false, qty:"", unit:p.unit });
 
@@ -259,200 +211,170 @@
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
 
-  function getFiltered(){
-    const q = state.q.trim().toLowerCase();
-    if(!q) return PRODUCTS;
-    return PRODUCTS.filter(p => p.name.toLowerCase().includes(q));
-  }
-  function getPaged(){
-    const list = getFiltered();
-    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-    if(state.page > totalPages) state.page = totalPages;
-    const start = (state.page - 1) * PAGE_SIZE;
-    return { items: list.slice(start, start + PAGE_SIZE), total: list.length, totalPages };
-  }
+  function getFiltered(){const q=state.q.trim().toLowerCase();return q?PRODUCTS.filter(p=>p.name.toLowerCase().includes(q)):PRODUCTS;}
+  function getPaged(){const list=getFiltered();const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));if(state.page>totalPages)state.page=totalPages;const start=(state.page-1)*PAGE_SIZE;return{items:list.slice(start,start+PAGE_SIZE),total:list.length,totalPages};}
 
   function render(){
     const { items, total, totalPages } = getPaged();
     tbody.innerHTML = "";
-
     items.forEach(p=>{
-      const st = ORDER_STATE.get(p.code) || { selected:false, qty:"", unit:p.unit };
-      const tr = document.createElement('tr');
-      tr.dataset.product = p.name;
-      tr.dataset.code    = p.code;
-      tr.dataset.img     = p.img;
-
-      tr.innerHTML = `
+      const st=ORDER_STATE.get(p.code)||{selected:false,qty:"",unit:p.unit};
+      const tr=document.createElement('tr');
+      tr.dataset.product=p.name; tr.dataset.code=p.code; tr.dataset.img=p.img;
+      tr.innerHTML=`
         <td data-label="Producto"><button class="name-btn" type="button">${p.name}</button></td>
         <td class="code" data-label="COD SAP">${p.code}</td>
-        <td data-label="Cantidad">
-          <input class="qty" type="text" inputmode="numeric" placeholder="0" value="${st.qty!==""?st.qty:""}" />
-        </td>
+        <td data-label="Cantidad"><input class="qty" type="text" inputmode="numeric" placeholder="0" value="${st.qty!==""?st.qty:""}" /></td>
         <td data-label="Magnitud">
           <select class="unit">
-            <option value="unidades"${st.unit==="unidades"?" selected":""}>unidades</option>
-            <option value="cientos"${st.unit==="cientos"?" selected":""}>cientos</option>
-            <option value="millares"${st.unit==="millares"?" selected":""}>millares</option>
+            <option value="UNIDADES"${st.unit==="UNIDADES"?" selected":""}>UNIDADES</option>
+            <option value="CIENTO"${st.unit==="CIENTO"?" selected":""}>CIENTO</option>
+            <option value="MILLAR"${st.unit==="MILLAR"?" selected":""}>MILLAR</option>
+            <option value="LITRO"${st.unit==="LITRO"?" selected":""}>LITRO</option>
           </select>
         </td>
-        <td data-label="Seleccionar">
-          <button class="select-btn ${st.selected ? "selected" : ""}" type="button">
-            ${st.selected ? "SELECCIONADO" : "PEDIDO"}
-          </button>
-        </td>
+        <td data-label="Seleccionar"><button class="select-btn ${st.selected ? "selected" : ""}" type="button">${st.selected ? "SELECCIONADO" : "PEDIDO"}</button></td>
       `;
       tbody.appendChild(tr);
     });
-
-    pageInfo.textContent = `Página ${state.page} de ${totalPages} · ${total} producto(s)`;
-    prevBtn.disabled = state.page <= 1;
-    nextBtn.disabled = state.page >= totalPages;
+    pageInfo.textContent=`Página ${state.page} de ${totalPages} · ${total} producto(s)`;
+    prevBtn.disabled=state.page<=1; nextBtn.disabled=state.page>=totalPages;
   }
 
-  // Delegación de eventos
-  tbody.addEventListener("click", (e)=>{
-    const tr = e.target.closest("tr"); if(!tr) return;
-    const code = tr.dataset.code; const st = ORDER_STATE.get(code);
-
-    if (e.target.classList.contains("select-btn")) {
-      const btn = e.target;
-      const sel = !btn.classList.contains("selected");
-      btn.classList.toggle("selected", sel);
-      btn.textContent = sel ? "SELECCIONADO" : "PEDIDO";
-      btn.setAttribute("aria-pressed", sel ? "true" : "false");
-      st.selected = sel; ORDER_STATE.set(code, st);
+  tbody.addEventListener("click",(e)=>{
+    const tr=e.target.closest("tr"); if(!tr) return;
+    const code=tr.dataset.code; const st=ORDER_STATE.get(code);
+    if(e.target.classList.contains("select-btn")){
+      const btn=e.target; const sel=!btn.classList.contains("selected");
+      btn.classList.toggle("selected",sel); btn.textContent=sel?"SELECCIONADO":"PEDIDO"; st.selected=sel; ORDER_STATE.set(code,st);
     }
-    if (e.target.classList.contains("name-btn")) showPopoverFor(tr, e.target);
+    if(e.target.classList.contains("name-btn")) showPopoverFor(tr,e.target);
   });
-  tbody.addEventListener("input", (e)=>{
-    const tr = e.target.closest("tr"); if(!tr) return;
-    const code = tr.dataset.code; const st = ORDER_STATE.get(code);
-    if (e.target.classList.contains("qty")) {
-      e.target.value = e.target.value.replace(/[^\d]/g,'');
-      st.qty = e.target.value; ORDER_STATE.set(code, st);
-    }
+  tbody.addEventListener("input",(e)=>{
+    const tr=e.target.closest("tr"); if(!tr) return;
+    const code=tr.dataset.code; const st=ORDER_STATE.get(code);
+    if(e.target.classList.contains("qty")){ e.target.value=e.target.value.replace(/[^\d]/g,''); st.qty=e.target.value; ORDER_STATE.set(code,st); }
   });
-  tbody.addEventListener("change", (e)=>{
-    const tr = e.target.closest("tr"); if(!tr) return;
-    const code = tr.dataset.code; const st = ORDER_STATE.get(code);
-    if (e.target.classList.contains("unit")) {
-      st.unit = e.target.value; ORDER_STATE.set(code, st);
-    }
+  tbody.addEventListener("change",(e)=>{
+    const tr=e.target.closest("tr"); if(!tr) return;
+    const code=tr.dataset.code; const st=ORDER_STATE.get(code);
+    if(e.target.classList.contains("unit")){ st.unit=e.target.value; ORDER_STATE.set(code,st); }
   });
 
-  document.getElementById('search').addEventListener('input', (e)=>{
-    state.q = e.target.value; state.page = 1; render();
-  });
-  prevBtn.addEventListener('click', ()=>{ state.page = Math.max(1, state.page-1); render(); });
-  nextBtn.addEventListener('click', ()=>{ state.page = state.page+1; render(); });
+  document.getElementById('search').addEventListener('input',(e)=>{state.q=e.target.value; state.page=1; render();});
+  prevBtn.addEventListener('click',()=>{state.page=Math.max(1,state.page-1); render();});
+  nextBtn.addEventListener('click',()=>{state.page=state.page+1; render();});
 
-  // Borrar todo: deselecciona, pone cantidades en 0 y limpia empresa/RUC
-  document.getElementById('btnClear').addEventListener('click', ()=>{
-    for (const p of PRODUCTS) {
-      const st = ORDER_STATE.get(p.code);
-      ORDER_STATE.set(p.code, { selected:false, qty:"0", unit: st ? st.unit : p.unit });
-    }
-    empresaSelect.selectedIndex = 0;
-    rucInput.value = "";
-    render();
+  document.getElementById('btnClear').addEventListener('click',()=>{
+    for(const p of PRODUCTS){const st=ORDER_STATE.get(p.code); ORDER_STATE.set(p.code,{selected:false,qty:"0",unit:st?st.unit:p.unit});}
+    empresaSelect.selectedIndex=0; rucInput.value=""; render();
   });
 
-  // Inicial
   render();
 
-  /* ====== Popover imagen ====== */
-  const pop = document.getElementById("imgPopover");
-  const popImg = pop.querySelector("img");
+  /* Popover */
+  const pop=document.getElementById("imgPopover");
+  const popImg=pop.querySelector("img");
   function showPopoverFor(tr, anchorEl){
     popImg.src = tr.dataset.img;
-    const rect = anchorEl.getBoundingClientRect();
-    const top = window.scrollY + rect.bottom + 10;
-    const left = Math.max(16, Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - 280));
-    pop.style.top = top + "px"; pop.style.left = left + "px";
-    pop.style.display = "block"; pop.setAttribute("aria-hidden","false");
+    const rect=anchorEl.getBoundingClientRect();
+    const top=window.scrollY+rect.bottom+10;
+    const left=Math.max(16, Math.min(window.scrollX+rect.left, window.scrollX+window.innerWidth-200));
+    pop.style.top=top+"px"; pop.style.left=left+"px";
+    pop.style.display="block"; pop.setAttribute("aria-hidden","false");
   }
-  document.addEventListener("click", (e)=>{
-    if (!pop.contains(e.target) && !e.target.classList.contains("name-btn")){
-      pop.style.display = "none"; pop.setAttribute("aria-hidden","true");
-    }
+  document.addEventListener("click",(e)=>{
+      if(!pop.contains(e.target) && !e.target.classList.contains("name-btn")){
+        pop.style.display="none"; pop.setAttribute("aria-hidden","true");
+      }
   });
 
-  /* ====== PDF (vista previa, sin imágenes) ====== */
+  /* PDF (vista previa, sin imágenes) */
   async function buildPDFBlob(){
-    const { jsPDF } = window.jspdf || {};
-    if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
-
+    const { jsPDF } = window.jspdf || {}; if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
     const seleccionados = PRODUCTS.map(p=>{
-      const st = ORDER_STATE.get(p.code);
-      if (!st || !st.selected) return null;
-      const qty = st.qty === "" ? 0 : parseInt(st.qty,10);
-      if (!Number.isFinite(qty) || qty < 0) return null;
-      return { nombre: p.name, code: p.code, qty, unit: st.unit };
+      const st=ORDER_STATE.get(p.code); if(!st||!st.selected) return null;
+      const qty=st.qty===""?0:parseInt(st.qty,10); if(!Number.isFinite(qty) || qty<0) return null;
+      return { nombre:p.name, code:p.code, qty, unit:st.unit };
     }).filter(Boolean);
-
     if(seleccionados.length===0){ alert("Selecciona al menos un producto y coloca una cantidad."); return null; }
-
-    const doc = new jsPDF({unit:'pt', format:'a4'});
-
-    const pageW = doc.internal.pageSize.getWidth();
-    doc.setFont('times','bold'); doc.setFontSize(16);
-    doc.text('Pedido - Rediplast', 40, 40);
-    doc.setFont('times','normal'); doc.setFontSize(10);
-    const fecha = new Date().toLocaleString();
-    doc.text(`Fecha: ${fecha}`, 40, 56);
-
-    // Empresa y RUC (desde el select y el input)
-    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
-    const ruc = rucInput.value || "";
-    if (empresaSelect.value) doc.text(`Empresa: ${empresaName}`, pageW - 40, 40, { align: 'right' });
-    if (ruc)                 doc.text(`RUC: ${ruc}`,           pageW - 40, 56, { align: 'right' });
-
-    // Tabla (sin imágenes) con cantidad centrada
-    const head = [["Producto","SAP COD","Cantidad","Magnitud"]];
-    const body = seleccionados.map(s=>[s.nombre, s.code, String(s.qty), s.unit]);
-
-    doc.autoTable({
-      head, body,
-      startY: 80,
-      styles:{halign:'left',cellPadding:6,fontSize:10},
-      headStyles:{fillColor:[26,57,255],textColor:255},
-      columnStyles:{2:{halign:'center'}} // cantidad centrada
-    });
-
+    const doc=new jsPDF({unit:'pt',format:'a4'}); const pageW=doc.internal.pageSize.getWidth();
+    doc.setFont('times','bold'); doc.setFontSize(16); doc.text('Pedido - Rediplast',40,40);
+    doc.setFont('times','normal'); doc.setFontSize(10); const fecha=new Date().toLocaleString(); doc.text(`Fecha: ${fecha}`,40,56);
+    const empresaName=empresaSelect.options[empresaSelect.selectedIndex]?.text||""; const ruc=rucInput.value||"";
+    if(empresaSelect.value) doc.text(`Empresa: ${empresaName}`, pageW-40,40,{align:'right'});
+    if(ruc) doc.text(`RUC: ${ruc}`, pageW-40,56,{align:'right'});
+    const head=[["Producto","SAP COD","Cantidad","Magnitud"]]; const body=seleccionados.map(s=>[s.nombre,s.code,String(s.qty),s.unit]);
+    doc.autoTable({ head, body, startY:80, styles:{halign:'left',cellPadding:6,fontSize:10}, headStyles:{fillColor:[26,57,255],textColor:255}, columnStyles:{2:{halign:'center'}} });
     return doc.output('blob');
   }
 
-  // Modal vista previa
-  const modal = document.getElementById('pdfModal');
-  const pdfFrame = document.getElementById('pdfFrame');
-  const closeBtn = document.getElementById('closePDF');
-  const downloadBtn = document.getElementById('downloadPDF');
-  let currentBlobUrl = null;
+  /* ====== Enviar por WhatsApp ====== */
+  // Si quieres fijar un número, ponlo aquí: "51xxxxxxxxx"; si lo dejas "", abre selector de contacto
+  const WHATSAPP_NUMBER = "930714244";
+
+  document.getElementById("btnWhatsApp").addEventListener("click", async () => {
+    // Generar el PDF
+    const blob = await buildPDFBlob();
+    if (!blob) return;
+
+    const fileName = `pedido-rediplast-${Date.now()}.pdf`;
+    const file = new File([blob], fileName, { type: "application/pdf" });
+
+    // Empresa y RUC para el mensaje
+    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
+    const ruc = rucInput.value || "";
+    let mensaje = "Hola, adjunto mi pedido en PDF.";
+    if (empresaName) mensaje += `\nEmpresa: ${empresaName}`;
+    if (ruc) mensaje += `\nRUC: ${ruc}`;
+
+    // 1) Intento: Web Share API (móvil)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "Pedido - Rediplast",
+          text: mensaje
+        });
+        return;
+      } catch (err) {
+        console.warn("Share cancelado o no disponible:", err);
+      }
+    }
+
+    // 2) Fallback (escritorio): abrir WhatsApp Web con texto y mostrar la vista previa para descargar el PDF
+    const waUrl = WHATSAPP_NUMBER
+      ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
+      : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(waUrl, "_blank");
+
+    // Abrir tu modal de vista previa para descargar el PDF y adjuntarlo manualmente
+    try {
+      const blobUrl = URL.createObjectURL(blob);
+      const pdfFrame = document.getElementById("pdfFrame");
+      const modal = document.getElementById("pdfModal");
+      pdfFrame.src = blobUrl;
+      modal.style.display = "flex";
+      modal.setAttribute("aria-hidden", "false");
+    } catch (e) {
+      console.warn("No se pudo abrir la vista previa del PDF:", e);
+    }
+  });
+
+  /* Modal PDF acciones */
+  const modal=document.getElementById('pdfModal');
+  const pdfFrame=document.getElementById('pdfFrame');
+  const closeBtn=document.getElementById('closePDF');
+  const downloadBtn=document.getElementById('downloadPDF');
+  let currentBlobUrl=null;
 
   document.getElementById("btnPDF").addEventListener("click", async ()=>{
-    const blob = await buildPDFBlob();
-    if(!blob) return;
+    const blob=await buildPDFBlob(); if(!blob) return;
     if(currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
-    currentBlobUrl = URL.createObjectURL(blob);
-    pdfFrame.src = currentBlobUrl;
-    modal.style.display = 'flex';
-    modal.setAttribute('aria-hidden','false');
+    currentBlobUrl=URL.createObjectURL(blob); pdfFrame.src=currentBlobUrl; modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
   });
-
-  closeBtn.addEventListener('click', ()=>{
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden','true');
-    if(currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; pdfFrame.src = ''; }
-  });
-
-  downloadBtn.addEventListener('click', ()=>{
-    if(!currentBlobUrl) return;
-    const a = document.createElement('a');
-    a.href = currentBlobUrl;
-    a.download = `pedido-rediplast-${Date.now()}.pdf`;
-    document.body.appendChild(a); a.click(); a.remove();
-  });
+  closeBtn.addEventListener('click',()=>{ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); if(currentBlobUrl){URL.revokeObjectURL(currentBlobUrl); currentBlobUrl=null; pdfFrame.src='';}});
+  downloadBtn.addEventListener('click',()=>{ if(!currentBlobUrl) return; const a=document.createElement('a'); a.href=currentBlobUrl; a.download=`pedido-rediplast-${Date.now()}.pdf`; a.click();});
 </script>
 </body>
 </html>
