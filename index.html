@@ -19,12 +19,7 @@
 
   .header-top{display:grid;grid-template-columns: 220px 1fr 280px;align-items:center;gap:16px;}
   .logo-box{width:220px;height:120px;background:var(--celeste);border-radius:14px;overflow:hidden}
-  .logo{
-    width:100%;
-    height:100%;
-    object-fit:fill;   /* Estira la imagen para llenar el recuadro */
-    display:block;
-  }
+  .logo{width:100%;height:100%;object-fit:fill;display:block}
 
   .titlebox{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center}
   h1{margin:0;font-size:clamp(22px,4.5vw,36px);font-weight:700}
@@ -37,16 +32,30 @@
   .toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
   .search{flex:1;min-width:240px;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:15px}
 
+  /* ===== GRID portada ===== */
+  #catalogSection{margin-top:12px}
+  .featured-title {
+  margin:12px 0 18px;
+  font-size:22px;
+  font-weight:700;
+  color:#111827;   /* azul que pediste antes */
+  text-align:center;   /* centrado */
+}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+  .grid-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:10px;border:0;cursor:pointer;text-align:center}
+  .grid-card__img-wrap{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#fff}
+  .grid-card img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .grid-card__name{margin-top:10px;font-weight:700}
+
+  /* ===== Tabla empresa ===== */
   .table-wrap{overflow:auto;margin-top:12px}
   table{width:100%;border-collapse:separate;border-spacing:0 12px}
   thead th{text-transform:uppercase;font-size:12px;letter-spacing:.08em;color:var(--muted);text-align:left;padding:0 14px;white-space:nowrap}
   tbody tr{background:#fff;box-shadow:var(--shadow);border-radius:14px}
   tbody td{padding:14px;vertical-align:middle}
-
   .name-btn{background:transparent;border:0;color:#0b57d0;cursor:pointer;font-weight:700;padding:0;text-align:left}
   .name-btn:focus{outline:2px solid #c7d2fe;border-radius:6px}
   .code{font-weight:700;letter-spacing:.3px}
-
   .qty{width:2cm;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:15px;outline:none;text-align:left}
   .qty:focus{border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
   .unit{padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff}
@@ -63,13 +72,14 @@
   .page-btn[disabled]{opacity:.5;cursor:not-allowed}
   .page-info{color:var(--muted);font-size:14px}
 
-  /* Popover miniatura (160x220) */
+  /* ===== Popover imagen ===== */
   .popover{position:absolute;z-index:50;display:none;background:transparent}
   .popover .popcard{background:#fff;border-radius:14px;box-shadow:0 10px 25px rgba(0,0,0,.18);padding:8px}
   .popover .viewport{width:160px;height:220px;display:flex;align-items:center;justify-content:center}
+  .popover .viewport.lg{width:min(90vw,520px);height:min(90vh,640px)}  /* grande para portada */
   .popover img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
 
-  /* Modal visor PDF */
+  /* ===== Modal visor PDF ===== */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
   .modal-card{background:#fff;border-radius:16px;box-shadow:0 25px 80px rgba(0,0,0,.35);max-width:900px;width:100%;height:90vh;display:flex;flex-direction:column}
   .modal-header{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
@@ -111,46 +121,55 @@
             <input id="ruc" type="text" inputmode="numeric" placeholder="RUC" readonly />
           </div>
         </div>
-        <div class="toolbar">
+        <!-- Buscar se mostrará SOLO en la vista de tabla -->
+        <div class="toolbar" id="searchBar">
           <input id="search" class="search" type="search" placeholder="Buscar por nombre..." />
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table id="tabla-productos" aria-describedby="Listado de productos">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>COD SAP</th>
-              <th>Cantidad</th>
-              <th>Magnitud</th>
-              <th>Seleccionar</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+      <!-- ======= CATÁLOGO BASE (GRID) ======= -->
+      <section id="catalogSection">
+        <div id="featuredTitle" class="featured-title">Productos destacados</div>
+        <div id="catalogGrid" class="grid"></div>
+      </section>
 
-      <div class="actions">
-        <div class="pager">
-          <button id="prev" class="page-btn">Anterior</button>
-          <span id="pageInfo" class="page-info"></span>
-          <button id="next" class="page-btn">Siguiente</button>
+      <!-- ======= LISTA POR EMPRESA (TABLA) ======= -->
+      <section id="tableSection" style="display:none">
+        <div class="table-wrap">
+          <table id="tabla-productos" aria-describedby="Listado de productos">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>COD SAP</th>
+                <th>Cantidad</th>
+                <th>Magnitud</th>
+                <th>Seleccionar</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button id="btnClear" class="btn secondary" type="button">Borrar todo</button>
-          <button id="btnPDF" class="btn" type="button">Vista previa PDF</button>
-          <!-- NUEVO: Enviar por WhatsApp -->
-          <button id="btnWhatsApp" class="btn" type="button" style="background:#25D366">Enviar por WhatsApp</button>
+
+        <div class="actions">
+          <div class="pager">
+            <button id="prev" class="page-btn">Anterior</button>
+            <span id="pageInfo" class="page-info"></span>
+            <button id="next" class="page-btn">Siguiente</button>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="btnClear" class="btn secondary" type="button">Borrar todo</button>
+            <button id="btnPDF" class="btn" type="button">Vista previa PDF</button>
+            <button id="btnWhatsApp" class="btn" type="button" style="background:#25D366">Enviar por WhatsApp</button>
+          </div>
         </div>
-      </div>
+      </section>
     </section>
   </main>
 
-  <!-- Popover miniatura -->
+  <!-- Popover miniatura / grande -->
   <div id="imgPopover" class="popover" role="dialog" aria-hidden="true">
     <div class="popcard">
-      <div class="viewport">
+      <div class="viewport" id="imgViewport">
         <img alt="Vista producto" />
       </div>
     </div>
@@ -173,50 +192,128 @@
   </div>
 
 <script>
-  /* Empresas */
+  /* ===================== Empresas ===================== */
   const COMPANIES = [
     { name: "PASTELERIA UNIVERSO", ruc: "1010256986" },
     { name: "SUPERMERCADO ALFA S.A.", ruc: "20512345678" },
     { name: "BODEGA LA ESQUINA", ruc: "10456789012" }
   ];
+
   const empresaSelect = document.getElementById('empresaSelect');
   const rucInput = document.getElementById('ruc');
+
   for (const c of COMPANIES) {
     const opt = document.createElement('option');
-    opt.value = c.ruc; opt.textContent = c.name; empresaSelect.appendChild(opt);
+    opt.value = c.ruc;
+    opt.textContent = c.name;
+    empresaSelect.appendChild(opt);
   }
+
   empresaSelect.addEventListener('change', ()=>{
-    const sel = empresaSelect.value;
-    const found = COMPANIES.find(c => c.ruc === sel);
+    const ruc = empresaSelect.value;
+    const found = COMPANIES.find(c => c.ruc === ruc);
     rucInput.value = found ? found.ruc : "";
+
+    if (ruc) { // tabla empresa
+      setCurrentCatalog(PRODUCTS_BY_COMPANY[ruc] || []);
+      toggleViews('table');
+    } else { // portada
+      setCurrentCatalog([]);
+      toggleViews('grid');
+    }
   });
 
-  /* Productos (rutas locales en /imagenes) */
+  /* ===================== Catálogo base (solo nombre + imagen) ===================== */
   const PRODUCTS = [
-    { name:"ZIPLOC 2X2", code:"12345678910", unit:"UNIDADES", img:"imagenes/2X2.png" },
-    { name:"ZIPLOC 3X3", code:"12345678911", unit:"CIENTO",  img:"imagenes/3X3.png" },
-    { name:"ZIPLOC 3X4", code:"12345678912", unit:"MILLAR",  img:"imagenes/3X4.png" },
-    { name:"ZIPLOC 3X5", code:"12345678913", unit:"CIENTO",  img:"imagenes/3X5.png" },
-    { name:"ZIPLOC 3X6", code:"12345678914", unit:"MILLAR",  img:"imagenes/3X6.png" }
+    { name:"ZIPLOC 2X2", img:"imagenes/2-2.png" },
+    { name:"ZIPLOC 3X3", img:"imagenes/3-3.png" },
+    { name:"ZIPLOC 3X4", img:"imagenes/3-4.png" },
+    { name:"ZIPLOC 3X5", img:"imagenes/3-5.png" },
+    { name:"ZIPLOC 3X6", img:"imagenes/3-6.png" },
+    { name:"ZIPLOC 2X2", img:"imagenes/2-2.png" },
+    { name:"ZIPLOC 3X3", img:"imagenes/3-3.png" },
+    { name:"ZIPLOC 3X4", img:"imagenes/3-4.png" },
+    { name:"ZIPLOC 3X5", img:"imagenes/3-5.png" },
+    { name:"ZIPLOC 3X6", img:"imagenes/3-6.png" },
   ];
+  const GRID_CATALOG = PRODUCTS;
 
-  /* Búsqueda + paginación */
-  const PAGE_SIZE = 10;
-  let state = { q:"", page:1 };
-  const ORDER_STATE = new Map();
-  for (const p of PRODUCTS) ORDER_STATE.set(p.code, { selected:false, qty:"", unit:p.unit });
+  /* ===================== Catálogos por empresa ===================== */
+  const PRODUCTS_BY_COMPANY = {
+    "1010256986": [
+      { name:"ZIPLOC 2X2", code:"12345678910", unit:"UNIDADES", img:"imagenes/2X2.png" },
+      { name:"ZIPLOC 3X3", code:"12345678911", unit:"CIENTO",    img:"imagenes/3X3.png" }
+    ],
+    "20512345678": [
+      { name:"ZIPLOC 3X4", code:"12345678912", unit:"MILLAR",  img:"imagenes/3X4.png" },
+      { name:"ZIPLOC 3X5", code:"12345678913", unit:"CIENTO",  img:"imagenes/3X5.png" },
+      { name:"ZIPLOC 3X6", code:"12345678914", unit:"MILLAR",  img:"imagenes/3X6.png" }
+    ],
+    "10456789012": [
+      { name:"ZIPLOC 2X2", code:"12345678910",  unit:"UNIDADES", img:"imagenes/2X2.png" }
+    ],
+    default: PRODUCTS
+  };
+
+  /* ===================== GRID inicial ===================== */
+  const catalogGrid = document.getElementById('catalogGrid');
+  function renderGrid(list = GRID_CATALOG) {
+    catalogGrid.innerHTML = '';
+    list.forEach(p => {
+      const card = document.createElement('button');
+      card.className = 'grid-card';
+      card.innerHTML = `
+        <div class="grid-card__img-wrap">
+          <img src="${p.img}" alt="${p.name}" />
+        </div>
+        <div class="grid-card__name">${p.name}</div>
+      `;
+      card.addEventListener('click', (e)=> showRawPopover(p.img, e.currentTarget, /*isGrid*/true));
+      catalogGrid.appendChild(card);
+    });
+  }
+
+  /* ===================== Tabla por empresa ===================== */
+  const tableSection = document.getElementById('tableSection');
+  const catalogSection = document.getElementById('catalogSection');
+  const searchBar = document.getElementById('searchBar');
+  const featuredTitle = document.getElementById('featuredTitle');
 
   const tbody = document.getElementById('tbody');
   const pageInfo = document.getElementById('pageInfo');
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
+  const searchInput = document.getElementById('search');
 
-  function getFiltered(){const q=state.q.trim().toLowerCase();return q?PRODUCTS.filter(p=>p.name.toLowerCase().includes(q)):PRODUCTS;}
-  function getPaged(){const list=getFiltered();const totalPages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));if(state.page>totalPages)state.page=totalPages;const start=(state.page-1)*PAGE_SIZE;return{items:list.slice(start,start+PAGE_SIZE),total:list.length,totalPages};}
+  const PAGE_SIZE = 10;
+  let state = { q:"", page:1 };
+  let CURRENT_PRODUCTS = [];
+  let ORDER_STATE = new Map();
 
-  function render(){
-    const { items, total, totalPages } = getPaged();
+  function setCurrentCatalog(products) {
+    CURRENT_PRODUCTS = Array.isArray(products) ? products.slice() : [];
+    ORDER_STATE = new Map();
+    for (const p of CURRENT_PRODUCTS) ORDER_STATE.set(p.code, { selected:false, qty:"", unit:p.unit });
+    state.page = 1;
+    renderTable();
+  }
+
+  function getFiltered(){
+    const q = state.q.trim().toLowerCase();
+    if(!q) return CURRENT_PRODUCTS;
+    return CURRENT_PRODUCTS.filter(p => p.name.toLowerCase().includes(q));
+  }
+  function getPaged(){
+    const list = getFiltered();
+    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if(state.page > totalPages) state.page = totalPages;
+    const start = (state.page - 1) * PAGE_SIZE;
+    return { items: list.slice(start, start + PAGE_SIZE), total: list.length, totalPages };
+  }
+
+  function renderTable(){
     tbody.innerHTML = "";
+    const { items, total, totalPages } = getPaged();
     items.forEach(p=>{
       const st=ORDER_STATE.get(p.code)||{selected:false,qty:"",unit:p.unit};
       const tr=document.createElement('tr');
@@ -238,117 +335,170 @@
       tbody.appendChild(tr);
     });
     pageInfo.textContent=`Página ${state.page} de ${totalPages} · ${total} producto(s)`;
-    prevBtn.disabled=state.page<=1; nextBtn.disabled=state.page>=totalPages;
+    prevBtn.disabled = state.page <= 1;
+    nextBtn.disabled = state.page >= totalPages;
   }
 
+  // Delegación eventos tabla
   tbody.addEventListener("click",(e)=>{
     const tr=e.target.closest("tr"); if(!tr) return;
     const code=tr.dataset.code; const st=ORDER_STATE.get(code);
     if(e.target.classList.contains("select-btn")){
       const btn=e.target; const sel=!btn.classList.contains("selected");
-      btn.classList.toggle("selected",sel); btn.textContent=sel?"SELECCIONADO":"PEDIDO"; st.selected=sel; ORDER_STATE.set(code,st);
+      btn.classList.toggle("selected",sel); btn.textContent=sel?"SELECCIONADO":"PEDIDO";
+      st.selected=sel; ORDER_STATE.set(code,st);
     }
-    if(e.target.classList.contains("name-btn")) showPopoverFor(tr,e.target);
+    if(e.target.classList.contains("name-btn")){
+      showRawPopover(tr.dataset.img, e.target, /*isGrid*/false);
+    }
   });
   tbody.addEventListener("input",(e)=>{
     const tr=e.target.closest("tr"); if(!tr) return;
     const code=tr.dataset.code; const st=ORDER_STATE.get(code);
-    if(e.target.classList.contains("qty")){ e.target.value=e.target.value.replace(/[^\d]/g,''); st.qty=e.target.value; ORDER_STATE.set(code,st); }
+    if(e.target.classList.contains("qty")){
+      e.target.value=e.target.value.replace(/[^\d]/g,'');
+      st.qty=e.target.value; ORDER_STATE.set(code,st);
+    }
   });
   tbody.addEventListener("change",(e)=>{
     const tr=e.target.closest("tr"); if(!tr) return;
     const code=tr.dataset.code; const st=ORDER_STATE.get(code);
-    if(e.target.classList.contains("unit")){ st.unit=e.target.value; ORDER_STATE.set(code,st); }
+    if(e.target.classList.contains("unit")){
+      st.unit=e.target.value; ORDER_STATE.set(code,st);
+    }
   });
 
-  document.getElementById('search').addEventListener('input',(e)=>{state.q=e.target.value; state.page=1; render();});
-  prevBtn.addEventListener('click',()=>{state.page=Math.max(1,state.page-1); render();});
-  nextBtn.addEventListener('click',()=>{state.page=state.page+1; render();});
-
-  document.getElementById('btnClear').addEventListener('click',()=>{
-    for(const p of PRODUCTS){const st=ORDER_STATE.get(p.code); ORDER_STATE.set(p.code,{selected:false,qty:"0",unit:st?st.unit:p.unit});}
-    empresaSelect.selectedIndex=0; rucInput.value=""; render();
+  // Buscar
+  searchInput.addEventListener('input', (e)=>{
+    state.q = e.target.value;
+    state.page = 1;
+    renderTable();
   });
 
-  render();
+  prevBtn?.addEventListener('click',()=>{ state.page=Math.max(1,state.page-1); renderTable(); });
+  nextBtn?.addEventListener('click',()=>{ state.page=state.page+1; renderTable(); });
 
-  /* Popover */
+  // Borrar todo (volver a portada)
+  document.getElementById('btnClear').addEventListener('click', ()=>{
+    for (const p of CURRENT_PRODUCTS) {
+      const st = ORDER_STATE.get(p.code);
+      ORDER_STATE.set(p.code, { selected:false, qty:"0", unit: st ? st.unit : p.unit });
+    }
+    empresaSelect.selectedIndex = 0;
+    rucInput.value = "";
+    state = { q:"", page:1 };
+    setCurrentCatalog([]);
+    renderGrid();
+    toggleViews('grid');
+  });
+
+  // Inicial: grid
+  renderGrid();
+  toggleViews('grid');
+
+  function toggleViews(which){
+    if (which === 'grid') {
+      catalogSection.style.display = '';
+      featuredTitle.style.display = '';
+      tableSection.style.display = 'none';
+      searchBar.style.display = 'none';        // ocultar buscar en portada
+    } else {
+      catalogSection.style.display = 'none';
+      featuredTitle.style.display = 'none';
+      tableSection.style.display = '';
+      searchBar.style.display = '';            // mostrar buscar en tabla
+    }
+  }
+
+  /* ===================== Popover de imagen ===================== */
   const pop=document.getElementById("imgPopover");
   const popImg=pop.querySelector("img");
-  function showPopoverFor(tr, anchorEl){
-    popImg.src = tr.dataset.img;
-    const rect=anchorEl.getBoundingClientRect();
-    const top=window.scrollY+rect.bottom+10;
-    const left=Math.max(16, Math.min(window.scrollX+rect.left, window.scrollX+window.innerWidth-200));
-    pop.style.top=top+"px"; pop.style.left=left+"px";
-    pop.style.display="block"; pop.setAttribute("aria-hidden","false");
+  const viewport = document.getElementById("imgViewport");
+
+  function showRawPopover(imgSrc, anchorEl, isGrid){
+    popImg.src = imgSrc;
+    // tamaño: grande para portada, pequeño para tabla
+    viewport.classList.toggle('lg', !!isGrid);
+
+    // mostrar primero para conocer dimensiones
+    pop.style.display = "block";
+    pop.setAttribute("aria-hidden","false");
+
+    const rect = anchorEl.getBoundingClientRect();
+    let top, left;
+
+    if (isGrid) {
+      // centrar en la pantalla para mejor visualización
+      const popRect = pop.getBoundingClientRect();
+      top  = window.scrollY + Math.max(20, (window.innerHeight - popRect.height)/2);
+      left = window.scrollX + Math.max(20, (window.innerWidth  - popRect.width )/2);
+    } else {
+      // junto al nombre en tabla
+      top  = window.scrollY + rect.bottom + 10;
+      left = Math.max(16, Math.min(window.scrollX + rect.left, window.scrollX + window.innerWidth - 240));
+    }
+
+    pop.style.top = `${top}px`;
+    pop.style.left = `${left}px`;
   }
+
   document.addEventListener("click",(e)=>{
-      if(!pop.contains(e.target) && !e.target.classList.contains("name-btn")){
-        pop.style.display="none"; pop.setAttribute("aria-hidden","true");
-      }
+    if(!pop.contains(e.target) && !e.target.closest('.name-btn') && !e.target.closest('.grid-card')){
+      pop.style.display="none"; pop.setAttribute("aria-hidden","true");
+    }
   });
 
-  /* PDF (vista previa, sin imágenes) */
+  /* ===================== PDF ===================== */
   async function buildPDFBlob(){
     const { jsPDF } = window.jspdf || {}; if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
-    const seleccionados = PRODUCTS.map(p=>{
+
+    const seleccionados = CURRENT_PRODUCTS.map(p=>{
       const st=ORDER_STATE.get(p.code); if(!st||!st.selected) return null;
       const qty=st.qty===""?0:parseInt(st.qty,10); if(!Number.isFinite(qty) || qty<0) return null;
       return { nombre:p.name, code:p.code, qty, unit:st.unit };
     }).filter(Boolean);
+
     if(seleccionados.length===0){ alert("Selecciona al menos un producto y coloca una cantidad."); return null; }
+
     const doc=new jsPDF({unit:'pt',format:'a4'}); const pageW=doc.internal.pageSize.getWidth();
     doc.setFont('times','bold'); doc.setFontSize(16); doc.text('Pedido - Rediplast',40,40);
     doc.setFont('times','normal'); doc.setFontSize(10); const fecha=new Date().toLocaleString(); doc.text(`Fecha: ${fecha}`,40,56);
+
     const empresaName=empresaSelect.options[empresaSelect.selectedIndex]?.text||""; const ruc=rucInput.value||"";
     if(empresaSelect.value) doc.text(`Empresa: ${empresaName}`, pageW-40,40,{align:'right'});
     if(ruc) doc.text(`RUC: ${ruc}`, pageW-40,56,{align:'right'});
-    const head=[["Producto","SAP COD","Cantidad","Magnitud"]]; const body=seleccionados.map(s=>[s.nombre,s.code,String(s.qty),s.unit]);
+
+    const head=[["Producto","SAP COD","Cantidad","Magnitud"]];
+    const body=seleccionados.map(s=>[s.nombre,s.code,String(s.qty),s.unit]);
     doc.autoTable({ head, body, startY:80, styles:{halign:'left',cellPadding:6,fontSize:10}, headStyles:{fillColor:[26,57,255],textColor:255}, columnStyles:{2:{halign:'center'}} });
     return doc.output('blob');
   }
 
-  /* ====== Enviar por WhatsApp ====== */
-  // Si quieres fijar un número, ponlo aquí: "51xxxxxxxxx"; si lo dejas "", abre selector de contacto
-  const WHATSAPP_NUMBER = "930714244";
+  /* ===================== WhatsApp ===================== */
+  const WHATSAPP_NUMBER = "0";
 
   document.getElementById("btnWhatsApp").addEventListener("click", async () => {
-    // Generar el PDF
     const blob = await buildPDFBlob();
     if (!blob) return;
 
     const fileName = `pedido-rediplast-${Date.now()}.pdf`;
     const file = new File([blob], fileName, { type: "application/pdf" });
 
-    // Empresa y RUC para el mensaje
     const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
     const ruc = rucInput.value || "";
     let mensaje = "Hola, adjunto mi pedido en PDF.";
     if (empresaName) mensaje += `\nEmpresa: ${empresaName}`;
     if (ruc) mensaje += `\nRUC: ${ruc}`;
 
-    // 1) Intento: Web Share API (móvil)
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: "Pedido - Rediplast",
-          text: mensaje
-        });
-        return;
-      } catch (err) {
-        console.warn("Share cancelado o no disponible:", err);
-      }
+      try { await navigator.share({ files: [file], title: "Pedido - Rediplast", text: mensaje }); return; } catch {}
     }
 
-    // 2) Fallback (escritorio): abrir WhatsApp Web con texto y mostrar la vista previa para descargar el PDF
     const waUrl = WHATSAPP_NUMBER
       ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
       : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(waUrl, "_blank");
 
-    // Abrir tu modal de vista previa para descargar el PDF y adjuntarlo manualmente
     try {
       const blobUrl = URL.createObjectURL(blob);
       const pdfFrame = document.getElementById("pdfFrame");
@@ -356,12 +506,10 @@
       pdfFrame.src = blobUrl;
       modal.style.display = "flex";
       modal.setAttribute("aria-hidden", "false");
-    } catch (e) {
-      console.warn("No se pudo abrir la vista previa del PDF:", e);
-    }
+    } catch {}
   });
 
-  /* Modal PDF acciones */
+  /* ===================== Modal PDF acciones ===================== */
   const modal=document.getElementById('pdfModal');
   const pdfFrame=document.getElementById('pdfFrame');
   const closeBtn=document.getElementById('closePDF');
@@ -378,5 +526,3 @@
 </script>
 </body>
 </html>
-
-
