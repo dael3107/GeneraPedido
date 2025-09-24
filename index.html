@@ -6,6 +6,7 @@
   <title>Rediplast | Genera tu pedido</title>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <style>
@@ -120,6 +121,15 @@
     .badge { display: none !important; }
     /* Ocultar miniaturas en la tabla */
     .name-with-thumb .thumb { display: none !important; }
+
+    /* Solo web: título con Bebas Neue 
+#brandTitle{
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 400;
+  letter-spacing: .5px;
+  text-transform: uppercase; 
+}*/
+
   </style>
 </head>
 <body>
@@ -609,48 +619,122 @@ function setCurrentCatalog(products) {
     }).filter(Boolean);
   }
 
-  async function buildPDFBlob(){
-    const { jsPDF } = window.jspdf || {};
-    if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
+async function buildPDFBlob(){
+  const { jsPDF } = window.jspdf || {};
+  if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
 
-    const seleccionados = listSeleccionados();
-    if(seleccionados.length === 0){
-      alert("Selecciona al menos un producto y coloca cantidad mayor a 0.");
-      return null;
-    }
-
-    const doc = new jsPDF({unit:'pt',format:'a4'});
-    const pageW = doc.internal.pageSize.getWidth();
-
-    doc.setFont('times','bold');
-    doc.setFontSize(16);
-    doc.text('Pedido - Rediplast', 40, 40);
-
-    doc.setFont('times','normal');
-    doc.setFontSize(10);
-    const fecha = new Date().toLocaleString();
-    doc.text(`Fecha: ${fecha}`, 40, 56);
-
-    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
-    const ruc = rucInput.value || "";
-    if(empresaSelect.value) doc.text(`Empresa: ${empresaName}`, pageW - 40, 40, { align:'right' });
-    if(ruc) doc.text(`RUC: ${ruc}`, pageW - 40, 56, { align:'right' });
-
-    const head = [["Producto","SAP COD","Cantidad","Unidad de Medida"]];
-    const body = seleccionados.map(s => [s.nombre, s.code, String(s.qty), s.unit]);
-
-    doc.autoTable({
-      head,
-      body,
-      startY:80,
-      styles:{halign:'left',cellPadding:6,fontSize:10},
-      headStyles:{fillColor:[26,57,255],textColor:255},
-      columnStyles:{2:{halign:'center'}}
-    });
-
-    return doc.output('blob');
+  const seleccionados = listSeleccionados();
+  if(seleccionados.length === 0){
+    alert("Selecciona al menos un producto y coloca cantidad mayor a 0.");
+    return null;
   }
 
+  const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
+  const ruc = rucInput.value || "";
+  const fecha = new Date().toLocaleString();
+
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const marginX = 40;
+  let cursorY = 32;
+
+  // ===== Encabezado (logo arriba izq) =====
+  let logoW = 120, logoH = 60;
+  // Cargamos el logo UNA vez para reutilizar (sirve también de marca de agua)
+  let wmImg = null, wmW = 0, wmH = 0;
+  try {
+    const logoEl = document.getElementById('logoRef');
+    if (logoEl && logoEl.src) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = logoEl.src;
+      await img.decode();
+      // Logo en encabezado
+      doc.addImage(img, 'PNG', marginX, cursorY, logoW, logoH);
+      // Guardamos para marca de agua (dimensionado al 45–60% de la hoja)
+      wmImg = img;
+      const maxW = pageW * 0.55;
+      const maxH = pageH * 0.55;
+      const ratio = img.naturalHeight > 0 ? (img.naturalHeight / img.naturalWidth) : (logoH / logoW);
+      wmW = Math.min(maxW, maxH / ratio);
+      wmH = wmW * ratio;
+    }
+  } catch(e){}
+
+  // Título centrado
+  doc.setFont('times','bold');
+  doc.setFontSize(18);
+  doc.text('Pedido - Rediplast', pageW/2, cursorY + 22, { align:'center' });
+
+  // Empresa / RUC / Fecha a la derecha (fecha DEBAJO del RUC)
+  doc.setFont('times','normal');
+  doc.setFontSize(10);
+  const rightX = pageW - marginX;
+  const empresaY = cursorY + 6;
+  const rucY     = cursorY + 22;
+  const fechaY   = cursorY + 38;
+
+  if (empresaName) doc.text(`Empresa: ${empresaName}`, rightX, empresaY, { align:'right' });
+  if (ruc)         doc.text(`RUC: ${ruc}`,            rightX, rucY,     { align:'right' });
+  doc.text(`Fecha: ${fecha}`,                          rightX, fechaY,   { align:'right' });
+
+  // Línea separadora (debajo del logo o la fecha, lo que quede más bajo)
+  const lineY = Math.max(cursorY + logoH, fechaY) + 16;
+  doc.setDrawColor(20,20,20);
+  doc.setLineWidth(0.6);
+  doc.line(marginX, lineY, pageW - marginX, lineY);
+  cursorY = lineY + 14;
+
+  // ===== Tabla =====
+  const head = [["Producto","SAP COD","Cantidad","Unidad de Medida"]];
+  const body = seleccionados.map(s => [s.nombre, s.code, String(s.qty), s.unit]);
+
+  doc.autoTable({
+    head,
+    body,
+    startY: cursorY,
+    styles: { halign:'left', cellPadding:6, fontSize:10 },
+    headStyles: { fillColor:[26,57,255], textColor:255 },
+    alternateRowStyles: { fillColor:[245,246,250] },
+    columnStyles: { 2:{ halign:'center', cellWidth:70 }, 3:{ halign:'center', cellWidth:120 } },
+    margin: { left: marginX, right: marginX },
+
+    // >>> Marca de agua centrada en cada página
+    didDrawPage: (data) => {
+      if (wmImg && wmW && wmH) {
+        try {
+          const centerX = (pageW - wmW) / 2;
+          const centerY = (pageH - wmH) / 2;
+          // Bajar opacidad (requiere jsPDF >= 2.5)
+          if (doc.GState) {
+            const fade = new doc.GState({ opacity: 0.06 }); // 6% de opacidad
+            doc.setGState(fade);
+            doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
+            const full = new doc.GState({ opacity: 1 });
+            doc.setGState(full);
+          } else {
+            // Fallback: sin gState (algunas builds antiguas) — igual lo dibujamos
+            doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
+          }
+        } catch(e){}
+      }
+
+      // Pie de página
+      const str = `Rediplast S.A.C. · ventas@rediplast.pe · 998353898`;
+      doc.setFont('times','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.text(str, pageW/2, pageH - 24, { align:'center' });
+
+      const page = doc.internal.getNumberOfPages();
+      doc.text(`Página ${data.pageNumber} de ${page}`, pageW - marginX, pageH - 24, { align:'right' });
+    }
+  });
+
+  // Sin observaciones / firma / atendido por.
+  return doc.output('blob');
+}
   /* ======= Helpers para nombre de archivo y guardado ======= */
   function sanitizeFilename(str){
     return (str || '')
@@ -777,4 +861,3 @@ function setCurrentCatalog(products) {
 </script>
 </body>
 </html>
-
