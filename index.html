@@ -256,6 +256,7 @@
 
   /* ===================== Catálogos por empresa ===================== */
   const PRODUCTS_BY_COMPANY = {
+
     "20519059895": [
       { name:"BOLSA ZIPLOC 2X2", code:"12345678910", unit:"MILLAR", img:"imagenes/2X2.png" },
       { name:"BOLSA ZIPLOC 3X3", code:"12345678911", unit:"MILLAR", img:"imagenes/3X3.png" },
@@ -375,25 +376,30 @@
     ],
     default: PRODUCTS
   };
+  // --- Orden alfabético (ES) ---
+const collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+const sortByName = (a, b) => collator.compare(a.name, b.name);
+
 
   /* ===================== GRID inicial ===================== */
   const catalogGrid = document.getElementById('catalogGrid');
-  function renderGrid(list = GRID_CATALOG) {
-    catalogGrid.innerHTML = '';
-    list.forEach(p => {
-      const card = document.createElement('button');
-      card.className = 'grid-card';
-      card.innerHTML = `
-        <div class="grid-card__img-wrap">
-          <img src="${p.img}" alt="${p.name}" />
-        </div>
-        ${p.unit ? `<span class="badge">${p.unit}</span>` : ""}
-        <div class="grid-card__name">${p.name}</div>
-      `;
-      card.addEventListener('click', () => showImageModal(p.img));
-      catalogGrid.appendChild(card);
-    });
-  }
+function renderGrid(list = GRID_CATALOG) {
+  catalogGrid.innerHTML = '';
+  const data = list.slice().sort(sortByName); // ordenamos aquí
+  data.forEach(p => {
+    const card = document.createElement('button');
+    card.className = 'grid-card';
+    card.innerHTML = `
+      <div class="grid-card__img-wrap">
+        <img src="${p.img}" alt="${p.name}" />
+      </div>
+      ${p.unit ? `<span class="badge">${p.unit}</span>` : ""}
+      <div class="grid-card__name">${p.name}</div>
+    `;
+    card.addEventListener('click', () => showImageModal(p.img));
+    catalogGrid.appendChild(card);
+  });
+}
 
   /* ===================== Tabla por empresa ===================== */
   const tableSection = document.getElementById('tableSection');
@@ -411,16 +417,16 @@
   let CURRENT_PRODUCTS = [];
   let ORDER_STATE = new Map();
 
-  function setCurrentCatalog(products) {
-    CURRENT_PRODUCTS = Array.isArray(products) ? products.slice() : [];
-    ORDER_STATE = new Map();
-    for (const p of CURRENT_PRODUCTS) {
-      const code = p.code || p.name; // fallback seguro
-      ORDER_STATE.set(code, { selected:false, qty:"", unit:p.unit });
-    }
-    state.page = 1;
-    renderTable();
+function setCurrentCatalog(products) {
+  CURRENT_PRODUCTS = Array.isArray(products) ? products.slice().sort(sortByName) : [];
+  ORDER_STATE = new Map();
+  for (const p of CURRENT_PRODUCTS) {
+    const code = p.code || p.name;
+    ORDER_STATE.set(code, { selected:false, qty:"", unit:p.unit });
   }
+  state.page = 1;
+  renderTable();
+}
 
   function getFiltered(){
     const q = state.q.trim().toLowerCase();
@@ -716,7 +722,7 @@
     let mensaje = "Hola, adjunto mi pedido en PDF.";
     if (empresaName) mensaje += `\nEmpresa: ${empresaName}`;
     if (ruc) mensaje += `\nRUC: ${ruc}`;
-    mensaje += resumenSeleccionadosTexto();
+    /*mensaje += resumenSeleccionadosTexto(); si en caso quiero que salga el detalle de pedido escrito para el whatsapp*/
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
@@ -771,3 +777,4 @@
 </script>
 </body>
 </html>
+
