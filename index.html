@@ -10,11 +10,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
   <style>
-    /* ========= Base (claro fijo) ========= */
     :root{
       --primary:#1f3fff; --primary-pressed:#162dcc; --primary-soft:#eef2ff;
-      --accent:#22c55e; --danger:#ef4444; --text:#0f172a; --muted:#64748b;
-      --bg:#ffffff; --page:#f6f7fb; --line:#e5e7eb; --radius:16px;
+      --accent:#22c55e; --danger:red; --text:#0f172a; --muted:#64748b;
+      --bg:#E8F3FC; --page:#E8F3FC; --line:#e5e7eb; --radius:16px;
       --shadow-sm:0 4px 12px rgba(2,6,23,.06); --shadow-md:0 10px 24px rgba(2,6,23,.08);
     }
     *{box-sizing:border-box}
@@ -23,8 +22,20 @@
     .card{background:var(--bg);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:24px;border:1px solid var(--line)}
     .header{display:block;margin-bottom:8px}
     .header-top{display:grid;grid-template-columns: 220px 1fr 280px;align-items:center;gap:16px;}
-    .logo-box{width:220px;height:120px;background:#fff;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
-    .logo{width:100%;height:100%;object-fit:fill;display:block}
+    .header{ margin-bottom: 6px; }
+    #catalogSection{ margin-top: 6px; }
+    .featured-title{ margin: 10px 0 12px; }
+
+    /* Logo grande en web sin aumentar el alto real del header visual */
+    .logo-box{ height: 120px; overflow: visible; }
+    .logo{ height: 350px; width: auto; object-fit: contain; margin-top: -90px; }
+
+    @media (max-width:980px){
+      .logo-box{ height: 64px; }
+      .logo{ height: 84px; margin-top: -10px; }
+      .featured-title{ margin: 8px 0 10px; }
+    }
+
     .titlebox{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center}
     h1{margin:0;font-size:clamp(24px,4.2vw,38px);font-weight:700;letter-spacing:.2px}
     .sub{color:var(--muted);font-size:15px}
@@ -39,18 +50,16 @@
     .search{flex:1;min-width:240px;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;background:#f8fafc}
     .search:focus{outline:none;border-color:#c7d2fe;box-shadow:0 0 0 4px rgba(99,102,241,.14)}
 
-    /* ===== GRID portada ===== */
     #catalogSection{margin-top:12px}
-    .featured-title{margin:20px 0 14px;font-size:24px;font-weight:700;text-align:center;color:#0b0b0c}
+    .featured-title{margin:20px 0 14px;font-size:24px;font-weight:700;text-align:center;color:black}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
-    .grid-card{position:relative;background:#fff;border-radius:16px;box-shadow:var(--shadow-sm);padding:10px;border:1px solid var(--line);cursor:pointer;text-align:center;transition:transform .12s, box-shadow .15s}
+    .grid-card{position:relative;background:BADCDE;border-radius:16px;box-shadow:var(--shadow-sm);padding:10px;border:1px solid var(--line);cursor:pointer;text-align:center;transition:transform .12s, box-shadow .15s}
     .grid-card:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(2,6,23,.10)}
     .grid-card__img-wrap{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:12px;overflow:hidden;background:#fff}
     .grid-card img{max-width:100%;max-height:100%;object-fit:contain;display:block}
     .grid-card__name{margin-top:10px;font-weight:700}
     .badge{ position:absolute; top:12px; left:12px; padding:6px 10px; font-size:11px; letter-spacing:.04em; font-weight:700; background:var(--primary); color:#fff; border-radius:999px; box-shadow:var(--shadow-sm) }
 
-    /* ===== Tabla empresa ===== */
     .table-wrap{overflow:auto;margin-top:12px}
     table{width:100%;border-collapse:separate;border-spacing:0 10px}
     thead th{text-transform:uppercase;font-size:12px;letter-spacing:.08em;color:#475569;text-align:left;padding:0 14px;white-space:nowrap}
@@ -85,13 +94,11 @@
     .page-btn[disabled]{opacity:.5;cursor:not-allowed}
     .page-info{color:var(--muted);font-size:14px}
 
-    /* ===== Modal de imagen grande ===== */
     .image-modal{position:fixed; inset:0; background:rgba(2,6,23,.55); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
     .image-modal-content{position:relative; background:var(--bg); border-radius:16px; padding:20px; max-width:90vw; max-height:90vh; display:flex; align-items:center; justify-content:center; box-shadow:0 25px 80px rgba(2,6,23,.35); border:1px solid var(--line)}
     .image-modal img{max-width:100%; max-height:80vh; object-fit:contain; display:block;}
     .image-modal-close{position:absolute; top:10px; right:14px; font-size:28px; font-weight:700; color:var(--text); cursor:pointer; background:none; border:none; line-height:1;}
 
-    /* ===== Modal visor PDF ===== */
     .modal{position:fixed;inset:0;background:rgba(2,6,23,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
     .modal-card{background:var(--bg);border-radius:16px;box-shadow:0 25px 80px rgba(2,6,23,.35);max-width:900px;width:100%;height:90vh;display:flex;flex-direction:column;border:1px solid var(--line)}
     .modal-header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
@@ -101,7 +108,6 @@
     .pdf-frame{width:100%;height:100%;border:0}
     .viewer-mask{ position:absolute; top:0; left:0; right:0; height:56px; background:var(--bg); z-index:2; pointer-events:auto; box-shadow:0 2px 6px rgba(2,6,23,.06); }
 
-    /* ===== Responsive ===== */
     @media (max-width:980px){
       .header-top{grid-template-columns:1fr; gap:12px;}
       .logo-box{margin:0 auto; display:flex; justify-content:center; align-items:center; height:auto;}
@@ -117,19 +123,9 @@
       .actions{justify-content:stretch}
     }
 
-    /* 🔴 Ocultar badge de unidad en portada (si lo deseas visible, elimina esto) */
     .badge { display: none !important; }
-    /* Ocultar miniaturas en la tabla */
     .name-with-thumb .thumb { display: none !important; }
-
-    /* Solo web: título con Bebas Neue 
-#brandTitle{
-  font-family: 'Bebas Neue', sans-serif;
-  font-weight: 400;
-  letter-spacing: .5px;
-  text-transform: uppercase; 
-}*/
-
+    #btnWhatsApp { display: none !important; }
   </style>
 </head>
 <body>
@@ -138,7 +134,7 @@
     <div class="header">
       <div class="header-top">
         <div class="logo-box">
-          <img id="logoRef" class="logo" src="imagenes/logo.jpg" alt="Logo Rediplast" />
+          <img id="logoRef" class="logo" src="imagenes/logo.png" alt="Logo Rediplast" />
         </div>
         <div class="titlebox">
           <h1 id="brandTitle">Genera tu pedido Rediplast</h1>
@@ -156,13 +152,11 @@
       </div>
     </div>
 
-    <!-- ======= CATÁLOGO BASE (GRID) ======= -->
     <section id="catalogSection">
       <div id="featuredTitle" class="featured-title">Productos destacados</div>
       <div id="catalogGrid" class="grid"></div>
     </section>
 
-    <!-- ======= LISTA POR EMPRESA (TABLA) ======= -->
     <section id="tableSection" style="display:none">
       <div class="table-wrap">
         <table id="tabla-productos" aria-describedby="Listado de productos">
@@ -186,15 +180,15 @@
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button id="btnClear" class="btn secondary" type="button">Borrar todo</button>
-          <button id="btnPDF" class="btn" type="button">Vista previa PDF y descargar PEDIDO</button>
-          <button id="btnWhatsApp" class="btn" type="button" style="background:#25D366">Enviar por WhatsApp</button>
+          <button id="btnPDF" class="btn" type="button">descargar PDF PEDIDO</button>
+          <button id="btnWhatsApp" class="btn" type="button" style="background:#25D366">Enviar WhatsApp Escritorio</button>
+          <button id="btnWhatsAppImg" class="btn" type="button" style="background:#25D366">Enviar WhatsApp Movil</button>
         </div>
       </div>
     </section>
   </section>
 </main>
 
-<!-- Modal imagen grande -->
 <div id="imageModal" class="image-modal" aria-hidden="true">
   <div class="image-modal-content">
     <button class="image-modal-close" id="closeImageModal" aria-label="Cerrar previsualización">&times;</button>
@@ -202,7 +196,6 @@
   </div>
 </div>
 
-<!-- Modal visor PDF -->
 <div id="pdfModal" class="modal" aria-hidden="true">
   <div class="modal-card">
     <div class="modal-header">
@@ -220,7 +213,17 @@
 </div>
 
 <script>
-  /* ===================== Empresas ===================== */
+  const loadImage = (src) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+// === CONTROLES RÁPIDOS ===
+const PDF_SHOW_HEADER_LOGO = false; // false = oculta logo en PDF
+const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
+
   const COMPANIES = [
     { name: "PASTELERIA EL UNIVERSO EIRL", ruc: "20519059895" },
     { name: "SUPER GUSTO S.A.C.", ruc: "20608416545" },
@@ -251,7 +254,6 @@
     }
   });
 
-  /* ===================== Catálogo base (con unidad para badge) ===================== */
   const PRODUCTS = [
     { name:"BOLSA ZIPLOC 2X2", img:"imagenes/2-2.png", unit:"MILLAR" },
     { name:"BOLSA ZIPLOC 3X3", img:"imagenes/3-3.png", unit:"MILLAR" },
@@ -264,9 +266,7 @@
   ];
   const GRID_CATALOG = PRODUCTS;
 
-  /* ===================== Catálogos por empresa ===================== */
   const PRODUCTS_BY_COMPANY = {
-
     "20519059895": [
       { name:"BOLSA ZIPLOC 2X2", code:"12345678910", unit:"MILLAR", img:"imagenes/2X2.png" },
       { name:"BOLSA ZIPLOC 3X3", code:"12345678911", unit:"MILLAR", img:"imagenes/3X3.png" },
@@ -329,7 +329,6 @@
       { name:"GUANTES INDUST.CALIBRE 25 T- 8", code:"4020010028", unit:"PAQUETE", img:"imagenes/mantenimiento.png" },
       { name:"GUANTES QUIRURGICOS T-M", code:"4020010039", unit:"PAQUETE", img:"imagenes/mantenimiento.png" },
       { name:"GORRO DE ENFERMERA C/ELAST NEGRO", code:"4020010069", unit:"PAQUETE", img:"imagenes/mantenimiento.png" }
-
     ],
     "20600431677": [
       { name:"BOLSA A/D 10X22X2 NAT.", code:"1010010004", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
@@ -343,7 +342,7 @@
       { name:"BOLSA B/D 5X10X4 CRISTAL", code:"1010020012", unit:"CIENTO", img:"imagenes/mantenimiento.png" },
       { name:"BOLSA B/D 7X10X4 CRISTAL", code:"1010020027", unit:"CIENTO", img:"imagenes/mantenimiento.png" },
       { name:"BOLSA B/D 8X12X4 CRISTAL", code:"1010020039", unit:"CIENTO", img:"imagenes/mantenimiento.png" },
-      { name:"BOLSA B/D P/BASURA 140 LT. NEGRO C/F ECO", code:"1010020168", unit:"MILLAR", img:"imagenes/bolsa-basura.png" },
+      { name:"BOLSA B/D P/BASURA 140 LT. NEGRO C/F ECO", code:"1010020188", unit:"MILLAR", img:"imagenes/bolsa-basura.png" },
       { name:"BOLSA B/D P/BASURA 140 LT. NEGRO STD C/F", code:"1010020170", unit:"MILLAR", img:"imagenes/bolsa-basura.png" },
       { name:"BOLSA B/D P/BASURA 220 LT. NEGRO C/F ECO", code:"1010020188", unit:"MILLAR", img:"imagenes/bolsa-basura.png" },
       { name:"BOLSA B/D P/BASURA 50 LT. NEGRO STD", code:"1010020239", unit:"MILLAR", img:"imagenes/bolsa-basura.png" },
@@ -386,32 +385,29 @@
     ],
     default: PRODUCTS
   };
-  // --- Orden alfabético (ES) ---
-const collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
-const sortByName = (a, b) => collator.compare(a.name, b.name);
 
+  const collator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+  const sortByName = (a, b) => collator.compare(a.name, b.name);
 
-  /* ===================== GRID inicial ===================== */
   const catalogGrid = document.getElementById('catalogGrid');
-function renderGrid(list = GRID_CATALOG) {
-  catalogGrid.innerHTML = '';
-  const data = list.slice().sort(sortByName); // ordenamos aquí
-  data.forEach(p => {
-    const card = document.createElement('button');
-    card.className = 'grid-card';
-    card.innerHTML = `
-      <div class="grid-card__img-wrap">
-        <img src="${p.img}" alt="${p.name}" />
-      </div>
-      ${p.unit ? `<span class="badge">${p.unit}</span>` : ""}
-      <div class="grid-card__name">${p.name}</div>
-    `;
-    card.addEventListener('click', () => showImageModal(p.img));
-    catalogGrid.appendChild(card);
-  });
-}
+  function renderGrid(list = GRID_CATALOG) {
+    catalogGrid.innerHTML = '';
+    const data = list.slice().sort(sortByName);
+    data.forEach(p => {
+      const card = document.createElement('button');
+      card.className = 'grid-card';
+      card.innerHTML = `
+        <div class="grid-card__img-wrap">
+          <img src="${p.img}" alt="${p.name}" />
+        </div>
+        ${p.unit ? `<span class="badge">${p.unit}</span>` : ""}
+        <div class="grid-card__name">${p.name}</div>
+      `;
+      card.addEventListener('click', () => showImageModal(p.img));
+      catalogGrid.appendChild(card);
+    });
+  }
 
-  /* ===================== Tabla por empresa ===================== */
   const tableSection = document.getElementById('tableSection');
   const catalogSection = document.getElementById('catalogSection');
   const searchBar = document.getElementById('searchBar');
@@ -421,22 +417,22 @@ function renderGrid(list = GRID_CATALOG) {
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
   const searchInput = document.getElementById('search');
-/* cambiar la cantidad de productos que salga*/
-  const PAGE_SIZE = 15;
+
+  const PAGE_SIZE = 20;
   let state = { q:"", page:1 };
   let CURRENT_PRODUCTS = [];
   let ORDER_STATE = new Map();
 
-function setCurrentCatalog(products) {
-  CURRENT_PRODUCTS = Array.isArray(products) ? products.slice().sort(sortByName) : [];
-  ORDER_STATE = new Map();
-  for (const p of CURRENT_PRODUCTS) {
-    const code = p.code || p.name;
-    ORDER_STATE.set(code, { selected:false, qty:"", unit:p.unit });
+  function setCurrentCatalog(products) {
+    CURRENT_PRODUCTS = Array.isArray(products) ? products.slice().sort(sortByName) : [];
+    ORDER_STATE = new Map();
+    for (const p of CURRENT_PRODUCTS) {
+      const code = p.code || p.name;
+      ORDER_STATE.set(code, { selected:false, qty:"", unit:p.unit });
+    }
+    state.page = 1;
+    renderTable();
   }
-  state.page = 1;
-  renderTable();
-}
 
   function getFiltered(){
     const q = state.q.trim().toLowerCase();
@@ -495,7 +491,6 @@ function setCurrentCatalog(products) {
     nextBtn.disabled = state.page >= totalPages;
   }
 
-  // Delegación eventos tabla
   tbody.addEventListener("click",(e)=>{
     const tr = e.target.closest("tr");
     if(!tr) return;
@@ -541,7 +536,6 @@ function setCurrentCatalog(products) {
     }
   });
 
-  // Buscar
   searchInput.addEventListener('input', (e)=>{
     state.q = e.target.value;
     state.page = 1;
@@ -550,7 +544,6 @@ function setCurrentCatalog(products) {
   prevBtn?.addEventListener('click',()=>{ state.page = Math.max(1, state.page - 1); renderTable(); });
   nextBtn?.addEventListener('click',()=>{ state.page = state.page + 1; renderTable(); });
 
-  // Borrar todo (volver a portada)
   document.getElementById('btnClear').addEventListener('click', ()=>{
     for (const p of CURRENT_PRODUCTS) {
       const code = p.code || p.name;
@@ -579,7 +572,6 @@ function setCurrentCatalog(products) {
     }
   }
 
-  /* ===================== Modal de imagen ===================== */
   const imageModal = document.getElementById("imageModal");
   const modalImage = document.getElementById("modalImage");
   const closeImageModal = document.getElementById("closeImageModal");
@@ -607,7 +599,6 @@ function setCurrentCatalog(products) {
     }
   });
 
-  /* ===================== PDF ===================== */
   function listSeleccionados(){
     return CURRENT_PRODUCTS.map(p => {
       const code = p.code || p.name;
@@ -619,123 +610,124 @@ function setCurrentCatalog(products) {
     }).filter(Boolean);
   }
 
-async function buildPDFBlob(){
-  const { jsPDF } = window.jspdf || {};
-  if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
+  async function buildPDFBlob(){
+    const { jsPDF } = window.jspdf || {};
+    if(!jsPDF){ alert("No se pudo cargar jsPDF."); return null; }
 
-  const seleccionados = listSeleccionados();
-  if(seleccionados.length === 0){
-    alert("Selecciona al menos un producto y coloca cantidad mayor a 0.");
-    return null;
+    const seleccionados = listSeleccionados();
+    if(seleccionados.length === 0){
+      alert("Selecciona al menos un producto y coloca cantidad mayor a 0.");
+      return null;
+    }
+
+    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
+    const ruc = rucInput.value || "";
+    const fecha = new Date().toLocaleString();
+
+    const doc = new jsPDF({ unit:'pt', format:'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 40;
+    let cursorY = 32;
+
+    // Logo grande, pero reserva de header fija
+    const headerMaxW = 500;
+    const headerMaxH = 205;
+    const headerReserve = 70; // **reserva fija para no dejar hueco**
+    let wmImg = null, wmW = 0, wmH = 0;
+
+    try {
+      const logoEl = document.getElementById('logoRef');
+      if (PDF_SHOW_HEADER_LOGO && logoEl && logoEl.src) {
+        const img = await loadImage(logoEl.src);
+        const w = img.naturalWidth || 1;
+        const h = img.naturalHeight || 1;
+
+        let drawW = headerMaxW;
+        let drawH = drawW * (h / w);
+        if (drawH > headerMaxH) {
+          drawH = headerMaxH;
+          drawW = drawH * (w / h);
+        }
+        // Pintamos el logo grande (puede sobresalir bajo la línea)
+        doc.addImage(img, 'PNG', marginX, cursorY, drawW, drawH);
+
+        // Datos para marca de agua (igual que antes)
+        wmImg = img;
+        const maxW = pageW * 0.55;
+        const maxH = pageH * 0.55;
+        const ratio = h / w;
+        wmW = Math.min(maxW, maxH / ratio);
+        wmH = wmW * ratio;
+      }
+    } catch (e) {
+      console.warn('Logo PDF no cargado:', e);
+    }
+
+    // Título y datos
+    doc.setFont('times','bold');
+    doc.setFontSize(18);
+    doc.text('Pedido - Rediplast', pageW/2, cursorY + 22, { align:'center' });
+
+    doc.setFont('times','normal');
+    doc.setFontSize(10);
+    const rightX = pageW - marginX;
+    const empresaY = cursorY + 6;
+    const rucY     = cursorY + 22;
+    const fechaY   = cursorY + 38;
+    if (empresaName) doc.text(`Empresa: ${empresaName}`, rightX, empresaY, { align:'right' });
+    if (ruc)         doc.text(`RUC: ${ruc}`,            rightX, rucY,     { align:'right' });
+    doc.text(`Fecha: ${fecha}`,                          rightX, fechaY,   { align:'right' });
+
+    // Línea usando reserva fija, no la altura del logo
+    const lineY = Math.max(cursorY + headerReserve, fechaY) + 16;
+    doc.setDrawColor(20,20,20);
+    doc.setLineWidth(0.6);
+    doc.line(marginX, lineY, pageW - marginX, lineY);
+    cursorY = lineY + 14;
+
+    const head = [["Producto","SAP COD","Cantidad","Unidad de Medida"]];
+    const body = seleccionados.map(s => [s.nombre, s.code, String(s.qty), s.unit]);
+
+    doc.autoTable({
+      head,
+      body,
+      startY: cursorY,
+      styles: { halign:'left', cellPadding:6, fontSize:10 },
+      headStyles: { fillColor:[26,57,255], textColor:255 },
+      alternateRowStyles: { fillColor:[245,246,250] },
+      columnStyles: { 2:{ halign:'center', cellWidth:70 }, 3:{ halign:'center', cellWidth:120 } },
+      margin: { left: marginX, right: marginX },
+      didDrawPage: (data) => {
+        if (wmImg && wmW && wmH) {
+          try {
+            const centerX = (pageW - wmW) / 2;
+            const centerY = (pageH - wmH) / 2;
+            if (doc.GState) {
+              const fade = new doc.GState({ opacity: 0.06 });
+              doc.setGState(fade);
+              doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
+              const full = new doc.GState({ opacity: 1 });
+              doc.setGState(full);
+            } else {
+              doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
+            }
+          } catch(e){}
+        }
+        const str = `Rediplast S.A.C. · ventas@rediplast.pe · 998353898`;
+        doc.setFont('times','normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100);
+        doc.text(str, pageW/2, pageH - 24, { align:'center' });
+
+        const page = doc.internal.getNumberOfPages();
+        doc.text(`Página ${data.pageNumber} de ${page}`, pageW - marginX, pageH - 24, { align:'right' });
+      }
+    });
+
+    return doc.output('blob');
   }
 
-  const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
-  const ruc = rucInput.value || "";
-  const fecha = new Date().toLocaleString();
-
-  const doc = new jsPDF({ unit:'pt', format:'a4' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const marginX = 40;
-  let cursorY = 32;
-
-  // ===== Encabezado (logo arriba izq) =====
-  let logoW = 120, logoH = 60;
-  // Cargamos el logo UNA vez para reutilizar (sirve también de marca de agua)
-  let wmImg = null, wmW = 0, wmH = 0;
-  try {
-    const logoEl = document.getElementById('logoRef');
-    if (logoEl && logoEl.src) {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = logoEl.src;
-      await img.decode();
-      // Logo en encabezado
-      doc.addImage(img, 'PNG', marginX, cursorY, logoW, logoH);
-      // Guardamos para marca de agua (dimensionado al 45–60% de la hoja)
-      wmImg = img;
-      const maxW = pageW * 0.55;
-      const maxH = pageH * 0.55;
-      const ratio = img.naturalHeight > 0 ? (img.naturalHeight / img.naturalWidth) : (logoH / logoW);
-      wmW = Math.min(maxW, maxH / ratio);
-      wmH = wmW * ratio;
-    }
-  } catch(e){}
-
-  // Título centrado
-  doc.setFont('times','bold');
-  doc.setFontSize(18);
-  doc.text('Pedido - Rediplast', pageW/2, cursorY + 22, { align:'center' });
-
-  // Empresa / RUC / Fecha a la derecha (fecha DEBAJO del RUC)
-  doc.setFont('times','normal');
-  doc.setFontSize(10);
-  const rightX = pageW - marginX;
-  const empresaY = cursorY + 6;
-  const rucY     = cursorY + 22;
-  const fechaY   = cursorY + 38;
-
-  if (empresaName) doc.text(`Empresa: ${empresaName}`, rightX, empresaY, { align:'right' });
-  if (ruc)         doc.text(`RUC: ${ruc}`,            rightX, rucY,     { align:'right' });
-  doc.text(`Fecha: ${fecha}`,                          rightX, fechaY,   { align:'right' });
-
-  // Línea separadora (debajo del logo o la fecha, lo que quede más bajo)
-  const lineY = Math.max(cursorY + logoH, fechaY) + 16;
-  doc.setDrawColor(20,20,20);
-  doc.setLineWidth(0.6);
-  doc.line(marginX, lineY, pageW - marginX, lineY);
-  cursorY = lineY + 14;
-
-  // ===== Tabla =====
-  const head = [["Producto","SAP COD","Cantidad","Unidad de Medida"]];
-  const body = seleccionados.map(s => [s.nombre, s.code, String(s.qty), s.unit]);
-
-  doc.autoTable({
-    head,
-    body,
-    startY: cursorY,
-    styles: { halign:'left', cellPadding:6, fontSize:10 },
-    headStyles: { fillColor:[26,57,255], textColor:255 },
-    alternateRowStyles: { fillColor:[245,246,250] },
-    columnStyles: { 2:{ halign:'center', cellWidth:70 }, 3:{ halign:'center', cellWidth:120 } },
-    margin: { left: marginX, right: marginX },
-
-    // >>> Marca de agua centrada en cada página
-    didDrawPage: (data) => {
-      if (wmImg && wmW && wmH) {
-        try {
-          const centerX = (pageW - wmW) / 2;
-          const centerY = (pageH - wmH) / 2;
-          // Bajar opacidad (requiere jsPDF >= 2.5)
-          if (doc.GState) {
-            const fade = new doc.GState({ opacity: 0.06 }); // 6% de opacidad
-            doc.setGState(fade);
-            doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
-            const full = new doc.GState({ opacity: 1 });
-            doc.setGState(full);
-          } else {
-            // Fallback: sin gState (algunas builds antiguas) — igual lo dibujamos
-            doc.addImage(wmImg, 'PNG', centerX, centerY, wmW, wmH);
-          }
-        } catch(e){}
-      }
-
-      // Pie de página
-      const str = `Rediplast S.A.C. · ventas@rediplast.pe · 998353898`;
-      doc.setFont('times','normal');
-      doc.setFontSize(9);
-      doc.setTextColor(100);
-      doc.text(str, pageW/2, pageH - 24, { align:'center' });
-
-      const page = doc.internal.getNumberOfPages();
-      doc.text(`Página ${data.pageNumber} de ${page}`, pageW - marginX, pageH - 24, { align:'right' });
-    }
-  });
-
-  // Sin observaciones / firma / atendido por.
-  return doc.output('blob');
-}
-  /* ======= Helpers para nombre de archivo y guardado ======= */
   function sanitizeFilename(str){
     return (str || '')
       .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -766,19 +758,173 @@ async function buildPDFBlob(){
       await writable.close();
       return;
     }
-    // Fallback
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = suggestedName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.download = suggestedName;
+    document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
   }
 
-  /* ===================== WhatsApp & PDF Preview ===================== */
-  const WHATSAPP_NUMBER = "0"; // Cambia por e.g. "51XXXXXXXXX" (sin +)
+  function canShareFiles(file){
+    try { return !!(navigator.share && navigator.canShare && navigator.canShare({ files:[file] })); }
+    catch { return false; }
+  }
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }
+  function wrapIntoLines(ctx, text, maxWidth){
+    const words = String(text||'').split(/\s+/); const lines = []; let line = '';
+    for(const w of words){
+      const test = line ? line + ' ' + w : w;
+      if(ctx.measureText(test).width <= maxWidth){ line = test; }
+      else{
+        if(line) lines.push(line);
+        if(ctx.measureText(w).width > maxWidth){
+          let chunk = '';
+          for(const ch of w){
+            const t = chunk + ch;
+            if(ctx.measureText(t).width <= maxWidth) chunk = t;
+            else { lines.push(chunk); chunk = ch; }
+          }
+          line = chunk;
+        } else line = w;
+      }
+    }
+    if(line) lines.push(line);
+    return lines;
+  }
+
+  async function buildImageBlob(){
+    const seleccionados = listSeleccionados();
+    if(seleccionados.length === 0){
+      alert("Selecciona al menos un producto y coloca cantidad mayor a 0.");
+      return null;
+    }
+
+    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
+    const ruc   = rucInput.value || "";
+    const fecha = new Date().toLocaleString();
+
+    const DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const pageW = 1200, marginX = 50;
+    const colW = [520, 170, 120, 220];
+    const tableHeaderH = 42, rowBase = 28, rowPadY = 10;
+    const headerReserve = 90; // **reserva fija para imagen**
+
+    const tmp = document.createElement('canvas').getContext('2d');
+    tmp.font = "16px 'Fira Sans', Arial, sans-serif";
+    let rowsHeight = 0;
+    for(const s of seleccionados){
+      const lines = wrapIntoLines(tmp, s.nombre, colW[0]-16);
+      rowsHeight += Math.max(rowBase, lines.length*18) + rowPadY*2;
+    }
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const init = async () => {
+      const baseTop = 24;
+      let headerH = baseTop + headerReserve + 16; // se ajustará después de fijar tamaño
+
+      // Calcula alto total ahora que ya tenemos la reserva
+      const pageH = headerH + 20 + tableHeaderH + rowsHeight + 40;
+      canvas.width  = Math.floor(pageW*DPR);
+      canvas.height = Math.floor(pageH*DPR);
+      ctx.scale(DPR, DPR);
+
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,pageW,pageH);
+
+      try{
+        const logoEl = document.getElementById('logoRef');
+        if(PNG_SHOW_HEADER_LOGO && logoEl && logoEl.src){
+          const img = await loadImage(logoEl.src);
+          const w = img.naturalWidth || 1;
+          const h = img.naturalHeight || 1;
+
+          // Marca de agua (igual que antes)
+          const maxW = pageW * 0.50;
+          const maxH = pageH * 0.50;
+          const wmW = Math.min(maxW, maxH / (h / w));
+          const wmH = wmW * (h / w);
+          ctx.globalAlpha = 0.06;
+          ctx.drawImage(img, (pageW - wmW) / 2, (pageH - wmH) / 2, wmW, wmH);
+
+          // Logo encabezado grande (puede sobresalir bajo la línea)
+          ctx.globalAlpha = 1;
+          const headerMaxW = 800;
+          const headerMaxH = 405;
+          let drawW = headerMaxW;
+          let drawH = drawW * (h / w);
+          if (drawH > headerMaxH) {
+            drawH = headerMaxH;
+            drawW = drawH * (w / h);
+          }
+          ctx.drawImage(img, marginX, baseTop, drawW, drawH);
+        }
+      }catch(e){
+        console.warn('Logo IMG no cargado:', e);
+      }
+
+      // Título + datos
+      ctx.fillStyle = "#111827";
+      ctx.font = "700 24px 'Libre Baskerville', serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Pedido - Rediplast", pageW/2, 50);
+
+      ctx.font = "400 13px 'Fira Sans', Arial, sans-serif";
+      ctx.textAlign = "right";
+      if(empresaName) ctx.fillText(`Empresa: ${empresaName}`, pageW - marginX, 30);
+      if(ruc)         ctx.fillText(`RUC: ${ruc}`,             pageW - marginX, 48);
+      ctx.fillText(`Fecha: ${fecha}`,                          pageW - marginX, 66);
+
+      // Línea con headerH basado en reserva fija
+      ctx.strokeStyle = "#111827"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(marginX, headerH); ctx.lineTo(pageW - marginX, headerH); ctx.stroke();
+
+      // Cabecera tabla
+      let y = headerH + 20, x = marginX;
+      ctx.fillStyle = "#1a39ff";
+      ctx.fillRect(x, y, colW[0]+colW[1]+colW[2]+colW[3], tableHeaderH);
+      ctx.fillStyle = "#fff"; ctx.font = "700 13px 'Fira Sans', Arial, sans-serif"; ctx.textAlign = "left";
+      const colX = [x+10, x+colW[0]+10, x+colW[0]+colW[1]+10, x+colW[0]+colW[1]+colW[2]+10];
+      ctx.fillText("Producto", colX[0], y+26);
+      ctx.fillText("SAP COD",  colX[1], y+26);
+      ctx.fillText("Cantidad", colX[2], y+26);
+      ctx.fillText("Unidad de Medida", colX[3], y+26);
+      y += tableHeaderH;
+
+      const totalW = colW[0]+colW[1]+colW[2]+colW[3];
+      for(const s of seleccionados){
+        const lines = wrapIntoLines(ctx, s.nombre, colW[0]-16);
+        const rowH = Math.max(rowBase, lines.length*18) + rowPadY*2;
+        if (((y/tableHeaderH)|0) % 2 === 1) { ctx.fillStyle = "#eff2f8"; ctx.fillRect(x, y, totalW, rowH); }
+        ctx.fillStyle = "#0f172a"; ctx.font = "400 16px 'Fira Sans', Arial, sans-serif"; ctx.textAlign = "left";
+        let ty = y + rowPadY + 18;
+        for(const line of lines){ ctx.fillText(line, x+8, ty); ty += 18; }
+
+        ctx.font = "700 16px 'Fira Sans', Arial, sans-serif";
+        ctx.fillText(String(s.code), x + colW[0] + 8, y + rowH/2 + 6);
+        ctx.textAlign = "center"; ctx.font = "400 16px 'Fira Sans', Arial, sans-serif";
+        ctx.fillText(String(s.qty),  x + colW[0] + colW[1] + colW[2]/2, y + rowH/2 + 6);
+        ctx.textAlign = "left";
+        ctx.fillText(String(s.unit), x + colW[0] + colW[1] + colW[2] + 8, y + rowH/2 + 6);
+
+        y += rowH;
+      }
+
+      ctx.textAlign = "center"; ctx.font = "400 12px 'Fira Sans', Arial, sans-serif"; ctx.fillStyle = "#6b7280";
+      ctx.fillText("Rediplast S.A.C. · ventas@rediplast.pe · 998353898", pageW/2, (canvas.height / DPR) - 16);
+    };
+
+    await init();
+    return await new Promise(res => canvas.toBlob(b => res(b), 'image/png', 0.92));
+  }
+
+  const WHATSAPP_NUMBER = "0";
   const modal = document.getElementById('pdfModal');
   const pdfFrame = document.getElementById('pdfFrame');
   const closeBtn = document.getElementById('closePDF');
@@ -806,12 +952,11 @@ async function buildPDFBlob(){
     let mensaje = "Hola, adjunto mi pedido en PDF.";
     if (empresaName) mensaje += `\nEmpresa: ${empresaName}`;
     if (ruc) mensaje += `\nRUC: ${ruc}`;
-    /*mensaje += resumenSeleccionadosTexto(); si en caso quiero que salga el detalle de pedido escrito para el whatsapp*/
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: "Pedido - Rediplast", text: mensaje });
-        return; // en móviles soportados se adjunta el PDF
+        return;
       } catch {}
     }
 
@@ -821,7 +966,6 @@ async function buildPDFBlob(){
       : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     window.open(waUrl, "_blank");
 
-    // Abrir vista previa local del PDF como apoyo
     try {
       if(currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
       currentBlobUrl = URL.createObjectURL(blob);
@@ -829,6 +973,35 @@ async function buildPDFBlob(){
       modal.style.display = "flex";
       modal.setAttribute("aria-hidden", "false");
     } catch {}
+  });
+
+  document.getElementById("btnWhatsAppImg").addEventListener("click", async () => {
+    const blob = await buildImageBlob();
+    if (!blob) return;
+
+    const fileName = buildSuggestedFilename().replace(/\.pdf$/i, '') + ".png";
+    const file = new File([blob], fileName, { type: "image/png" });
+
+    const empresaName = empresaSelect.options[empresaSelect.selectedIndex]?.text || "";
+    const ruc = rucInput.value || "";
+
+    let mensaje = "Hola, adjunto mi pedido (imagen).";
+    if (empresaName) mensaje += `\nEmpresa: ${empresaName}`;
+    if (ruc) mensaje += `\nRUC: ${ruc}`;
+
+    if (canShareFiles(file)) {
+      try {
+        await navigator.share({ files:[file], title:"Pedido - Rediplast", text:mensaje });
+        return;
+      } catch(e) {}
+
+    }
+    downloadBlob(blob, fileName);
+    const waNum = e164(WHATSAPP_NUMBER);
+    const waUrl = waNum
+      ? `https://wa.me/${waNum}?text=${encodeURIComponent(mensaje)}`
+      : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(waUrl, "_blank");
   });
 
   document.getElementById("btnPDF").addEventListener("click", async ()=>{
@@ -855,7 +1028,6 @@ async function buildPDFBlob(){
     catch (e) { console.error(e); alert('No se pudo guardar el archivo.'); }
   });
 
-  // Arranque
   renderGrid();
   toggleViews('grid');
 </script>
