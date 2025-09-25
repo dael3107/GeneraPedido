@@ -630,39 +630,32 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
     const marginX = 40;
     let cursorY = 32;
 
-    // Logo grande, pero reserva de header fija
-    const headerMaxW = 500;
-    const headerMaxH = 205;
-    const headerReserve = 70; // **reserva fija para no dejar hueco**
-    let wmImg = null, wmW = 0, wmH = 0;
+    // --- SOLO MARCA DE AGUA (sin logo en header) ---
+let headerReserve = 74;               // altura fija de encabezado
+let wmImg = null, wmW = 0, wmH = 0;   // datos de watermark
 
-    try {
-      const logoEl = document.getElementById('logoRef');
-      if (PDF_SHOW_HEADER_LOGO && logoEl && logoEl.src) {
-        const img = await loadImage(logoEl.src);
-        const w = img.naturalWidth || 1;
-        const h = img.naturalHeight || 1;
+try {
+  const logoEl = document.getElementById('logoRef');
+  if (logoEl && logoEl.src) {
+    const img  = await loadImage(logoEl.src);
+    const natW = img.naturalWidth || 1;
+    const natH = img.naturalHeight || 1;
 
-        let drawW = headerMaxW;
-        let drawH = drawW * (h / w);
-        if (drawH > headerMaxH) {
-          drawH = headerMaxH;
-          drawW = drawH * (w / h);
-        }
-        // Pintamos el logo grande (puede sobresalir bajo la línea)
-        doc.addImage(img, 'PNG', marginX, cursorY, drawW, drawH);
+    // NO dibujamos el logo en el encabezado
 
-        // Datos para marca de agua (igual que antes)
-        wmImg = img;
-        const maxW = pageW * 0.55;
-        const maxH = pageH * 0.55;
-        const ratio = h / w;
-        wmW = Math.min(maxW, maxH / ratio);
-        wmH = wmW * ratio;
-      }
-    } catch (e) {
-      console.warn('Logo PDF no cargado:', e);
-    }
+    // SÍ preparamos la marca de agua
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const maxW = pageW * 0.55;
+    const maxH = pageH * 0.55;
+    const ratio = natH / natW;
+    wmImg = img;
+    wmW = Math.min(maxW, maxH / ratio);
+    wmH = wmW * ratio;
+  }
+} catch (e) {
+  console.warn('Watermark PDF no cargado:', e);
+}
 
     // Título y datos
     doc.setFont('times','bold');
@@ -838,36 +831,26 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
 
       ctx.fillStyle = "#fff"; ctx.fillRect(0,0,pageW,pageH);
 
-      try{
-        const logoEl = document.getElementById('logoRef');
-        if(PNG_SHOW_HEADER_LOGO && logoEl && logoEl.src){
-          const img = await loadImage(logoEl.src);
-          const w = img.naturalWidth || 1;
-          const h = img.naturalHeight || 1;
+      // --- SOLO MARCA DE AGUA (sin logo en header) ---
+try {
+  const logoEl = document.getElementById('logoRef');
+  if (logoEl && logoEl.src) {
+    const img = await loadImage(logoEl.src);
+    const natW = img.naturalWidth || 1;
+    const natH = img.naturalHeight || 1;
 
-          // Marca de agua (igual que antes)
-          const maxW = pageW * 0.50;
-          const maxH = pageH * 0.50;
-          const wmW = Math.min(maxW, maxH / (h / w));
-          const wmH = wmW * (h / w);
-          ctx.globalAlpha = 0.06;
-          ctx.drawImage(img, (pageW - wmW) / 2, (pageH - wmH) / 2, wmW, wmH);
-
-          // Logo encabezado grande (puede sobresalir bajo la línea)
-          ctx.globalAlpha = 1;
-          const headerMaxW = 800;
-          const headerMaxH = 405;
-          let drawW = headerMaxW;
-          let drawH = drawW * (h / w);
-          if (drawH > headerMaxH) {
-            drawH = headerMaxH;
-            drawW = drawH * (w / h);
-          }
-          ctx.drawImage(img, marginX, baseTop, drawW, drawH);
-        }
-      }catch(e){
-        console.warn('Logo IMG no cargado:', e);
-      }
+    // Dibujar SOLO marca de agua, centrada y tenue
+    const wmW = Math.min(pageW * 0.50, 450);
+    const wmH = wmW * (natH / natW);
+    const wmX = (pageW - wmW) / 2;
+    const wmY = 380; // ajusta si quieres más arriba/abajo
+    ctx.globalAlpha = 0.035;
+    ctx.drawImage(img, wmX, wmY, wmW, wmH);
+    ctx.globalAlpha = 1;
+  }
+} catch (e) {
+  console.warn('Watermark IMG no cargado:', e);
+}
 
       // Título + datos
       ctx.fillStyle = "#111827";
@@ -1033,3 +1016,5 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
 </script>
 </body>
 </html>
+
+
