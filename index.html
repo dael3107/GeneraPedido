@@ -265,9 +265,13 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
     { name:"BOLSA ZIPLOC 3X4", img:"imagenes/3-4.png", unit:"MILLAR" },
     { name:"BOLSA ZIPLOC 3X5", img:"imagenes/3-5.png", unit:"MILLAR" },
     { name:"BOLSA ZIPLOC 3X6", img:"imagenes/3-6.png", unit:"MILLAR" },
-    { name:"BOLSA DE DESECHOS", img:"imagenes/bolsa-basura.png", unit:"MILLAR" },
+    { name:"BOLSA DE DESECHOS", img:"imagenes/bolsanegra.png", unit:"MILLAR" },
+    { name:"BOLSA DE DESECHOS", img:"imagenes/bolsanaranja.png", unit:"MILLAR" },
+    { name:"BOLSA DE DESECHOS", img:"imagenes/bolsaverde.png", unit:"MILLAR" },
+    { name:"BOLSA DE DESECHOS", img:"imagenes/bolsaazul.png", unit:"MILLAR" },
     { name:"LEJIA 4.8 LT", img:"imagenes/lejia.png", unit:"UNIDAD" },
     { name:"DETERGENTE 13.5 KG", img:"imagenes/detergente.png", unit:"UNIDAD" },
+    { name:"VASO CORRUGADO", img:"imagenes/corrugado.png", unit:"UNIDAD" },
   ];
   const GRID_CATALOG = PRODUCTS;
 
@@ -540,7 +544,7 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
     ],
     "20202540334": [/*PRODUCTOS Y SERVICIOS VLADY S.A.C. - GENERADO*/
       { name:"BOLSA A/D ROLLO 8X12 PB-MATIC", code:"1010010081", unit:"UNIDAD", img:"imagenes/mantenimiento.png" },
-      { name:"COPA SOUFLE 1.00 ONZ", code:"2030040007", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
+      { name:"COPA SOUFLE 1.00 ONZ", code:"2030040007", unit:"MILLAR", img:"imagenes/SOUFLE.png" },
       { name:"LAMINA A/D ANTIGRASA 50X70 (500 HOJAS) PB", code:"1020010006", unit:"PAQUETE", img:"imagenes/mantenimiento.png" },
       { name:"BOLSA PPP 7X10X2", code:"1010040069", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
       { name:"BOLSA PPP 11X16X2", code:"1010040095", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
@@ -548,8 +552,8 @@ const PNG_SHOW_HEADER_LOGO = false; // false = oculta logo en imagen/WhatsApp
       { name:"BOLSA A/D 16X24 BCO. RDP", code:"1010010014", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
       { name:"ENVASE ALUMINIO 1/4 KG", code:"2040010004", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
       { name:"TAPA CRISTAL P/ALUMINIO 1/4 KG", code:"2040060059", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
-      { name:"COPA SOUFLE 0.5 ONZ", code:"2030040005", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
-      { name:"TAPA 0.5 ONZ, 0.75 ONZ, 1 ONZ-DAR", code:"2010020018", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
+      { name:"COPA SOUFLE 0.5 ONZ", code:"2030040005", unit:"MILLAR", img:"imagenes/SOUFLE.png" },
+      { name:"TAPA 0.5 ONZ, 0.75 ONZ, 1 ONZ-DAR", code:"2010020018", unit:"MILLAR", img:"imagenes/SOUFLE.png" },
       { name:"ENVASE 1 ONZ RED. C/T FOAM-SGB", code:"2040060003", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
       { name:"ENVASE 1/2 LT RED. S/TAPA TPTE (040356) SGB", code:"2010020038", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
       { name:"TAPA PP P/ENV 1/2-1 LT TPTE (040317) SGB", code:"2040060088", unit:"MILLAR", img:"imagenes/mantenimiento.png" },
@@ -1112,7 +1116,7 @@ try {
       }
 
       ctx.textAlign = "center"; ctx.font = "400 12px 'Fira Sans', Arial, sans-serif"; ctx.fillStyle = "#6b7280";
-      ctx.fillText("Rediplast S.A.C. · ventas@rediplast.pe · 998353898", pageW/2, (canvas.height / DPR) - 16);
+      ctx.fillText("Rediplast S.A.C. · ventas@rediplast.pe · 998353898  · Version 1.2 DTG", pageW/2, (canvas.height / DPR) - 16);
     };
 
     await init();
@@ -1228,7 +1232,3 @@ try {
 </script>
 </body>
 </html>
-
-
-
-
